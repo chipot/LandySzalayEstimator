@@ -9,7 +9,7 @@
 #include <Eigen/Dense>
 
 // ICoDF
-#include "logservice.hpp"
+#include "log.hh"
 #include "pointinfo.hpp"
 #include "trixel.hpp"
 
@@ -36,7 +36,8 @@ trixel** CreateTrixelChildren(trixel *parent)
         {
             if (parent->_children[i] != NULL)
             {
-                LS_ADDMSG(LogService::NOTICE, "ICoDF::CreateTrixelChildren", "Trixel already have child(ren)");
+                llog::notice["ICoDF::CreateTrixelChildren"]
+                    <<  "Trixel already have child(ren)" << std::endl;
             }
         }
     }
@@ -90,7 +91,8 @@ trixel* CreateTrixelChild(trixel* parent, unsigned short int& index)
 {
     if (parent->_children == NULL)
     {
-        LS_ADDMSG(LogService::NOTICE, "ICoDF::CreateTrixelChild", "Trixel as no container for children");
+        llog::notice["ICoDF::CreateTrixelChild"]
+            <<  "Trixel has no container for children" << std::endl;
         CreateTrixelChildren(parent);
     }
 
@@ -129,7 +131,8 @@ trixel* CreateTrixelChild(trixel* parent, unsigned short int& index)
                 parent->_children[index]->_vertices[2] = midPoints[2];
                 break;
             default:
-                LS_ADDMSG(LogService::FATAL, "ICoDF::CreateTrixelChild", "Given <index> is out of bound");
+                llog::fatal["ICoDF::CreateTrixelChild"]
+                    << "Given <index> is out of bound" << std::endl;
                 delete [] midPoints; 
                 return NULL;
         }
@@ -138,8 +141,9 @@ trixel* CreateTrixelChild(trixel* parent, unsigned short int& index)
     else
     {
         std::stringstream tmp;
-        tmp << "SubTrixel [" << parent->_HTMId << index << "] already exists";
-        LS_ADDMSG(LogService::NOTICE, "ICoDF::CreateTrixelChild", tmp.str());
+        llog::notice["ICoDF::CreateTrixelChild"]
+            << "SubTrixel [" << parent->_HTMId << index << "] already exists"
+            << std::endl;
     }
 
     return parent->_children[index];
@@ -201,8 +205,9 @@ unsigned short int GetIndex(trixel* trixel, double& ra, double& dec)
     else
     {
         std::stringstream tmp;
-        tmp << "Given <ra> [" << ra << "] or <dec> [" << dec << "] is out of bounds";
-        LS_ADDMSG(LogService::WARNING, "ICoDF_HTM", tmp.str());
+        llog::notice["HTM"]
+            << "Given <ra> [" << ra << "] or <dec> [" << dec << "] is out of bounds"
+            << std::endl;
     }
     return max<unsigned short>();
 }
@@ -244,7 +249,8 @@ unsigned short int GetIndex(trixel* trixel, Eigen::Vector3d& p)
     }
     else
     {
-        LS_ADDMSG(LogService::WARNING, "GetIndex", "Given <trixel> or its vertices has a NULL value");
+        llog::warn["GetIndex"]
+            <<  "Given <trixel> or its vertices has a NULL value" << std::endl;
         return max<unsigned short>();
     }
 }
@@ -263,7 +269,8 @@ void InitTrixel(trixel* trixel)
 {
     if (trixel == NULL)
     {
-        LS_ADDMSG(LogService::WARNING, "InitTrixel", "Given <trixel> has a NULL value");
+        llog::warn["InitTrixel"]
+            <<  "Given <trixel> has a NULL value" << std::endl;
     }
     else
     {

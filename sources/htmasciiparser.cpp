@@ -11,7 +11,7 @@
 #include <time.h>
 
 //BLINK Logservice
-#include "logservice.hpp"
+#include "log.hh"
 
 //BLINK includes
 #include "htm.hpp"
@@ -48,7 +48,8 @@ void HTMAsciiParser::Parse(std::string& filename)
         file.close();
     }
     else
-        LS_ADDMSG(LogService::FATAL, "HTMAsciiParser", "Can't Open File : " + filename);
+        llog::fatal["HTMAsciiParser"]
+            << "Can't Open File : " << filename << std::endl;
 }
 
 unsigned int& HTMAsciiParser::getNbObj(void)

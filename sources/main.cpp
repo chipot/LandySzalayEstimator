@@ -3,15 +3,13 @@
 #include <unistd.h>
 #include <sstream>
 
-#include "logservice.hpp"
 #include "htm.hpp"
 #include "htmasciiparser.hpp"
+#include "log.hh"
 
 int main(int ac, char **av)
 {
-    // SETTING UP LOG
-    LogService::GetInstance()->SetConfiguration(LogService::LS_PRINT_ON_COUT);
-    LS_ADDMSG(LogService::NOTICE, "main", "BLINK::HTM test main");
+    llog::notice["main"] << "BLINK::HTM test main" << std::endl;
     if (ac == 4)
     {
         int loop = 100;
@@ -27,32 +25,26 @@ int main(int ac, char **av)
         double delta = 0;
         stm2 >> delta;
 
-        LS_ADDMSG(LogService::NOTICE, "main", "Computing Normal Catalog...");
+        llog::notice["main"] << "Computing Normal Catalog..." << std::endl;;
         htm->CreateOctahedron();
         parser->Parse(file);
         htm->CreateHTM();
-        LS_ADDMSG(LogService::NOTICE, "main", "HTM Created for Normal Catalog");
+        llog::notice["main"] << "HTM Created for Normal Catalog" << std::endl;;
         unsigned int nn = htm->TwoPointsCorrelation(radius, delta);
         std::stringstream tmp;
-        tmp.str("");
-        tmp << "Two Point Correlation have been computed for the Normal Catalog [" << nn << "] pairs"; 
-        LS_ADDMSG(LogService::NOTICE, "main", tmp.str());
+        llog::notice["main"] << "Two Point Correlation have been computed for the Normal Catalog [" << nn << "] pairs" << std::endl; 
 
         double raMin = htm->getMinRa();
         double raMax = htm->getMaxRa();
         double decMin = htm->getMinDec();
         double decMax = htm->getMaxDec();
-        tmp.str("");
-        tmp << "Computing Mean values for Random and Hybrid Catalog on " << loop << " loops using " << parser->getNbObj() << " random objects...";
-        LS_ADDMSG(LogService::NOTICE, "main", tmp.str());
+        llog::notice["main"] << "Computing Mean values for Random and Hybrid Catalog on " << loop << " loops using " << parser->getNbObj() << " random objects..." << std::endl;
 
         unsigned int rr = 0;
         unsigned int nr = 0;
         for (int i = 0; i != loop; ++i)
         {
-            tmp.str("");
-            tmp << "Computing loop " << i + 1 << " on " << loop; 
-            LS_ADDMSG(LogService::NOTICE, "main", tmp.str());
+            llog::notice["main"] << "Computing loop " << i + 1 << " on " << loop << std::endl;
             htm->DeleteOctahedron();
             htm->CreateOctahedron();
             parser->UniformNumberGenerator(raMin, raMax, decMin, decMax);
@@ -60,21 +52,16 @@ int main(int ac, char **av)
 
             unsigned int currentRR = htm->TwoPointsCorrelation(radius, delta);
             rr += currentRR;
-            tmp.str("");
-            tmp << "Two POint Correlation have been computed for the Random Catalog [" << currentRR << "] mean [" << (rr / (i + 1)) << "]";
-
-            LS_ADDMSG(LogService::NOTICE, "main", tmp.str());
+            llog::notice["main"] << "Two POint Correlation have been computed for the Random Catalog [" << currentRR << "] mean [" << (rr / (i + 1)) << "]" << std::endl;
 
             parser->Parse(file);
             htm->CreateHTM();
             unsigned int currentNR = htm->TwoPointsCorrelation(radius, delta);
             nr += currentNR;
-            tmp.str("");
-            tmp << "Two POint Correlation have been computed for the Hybrid Catalog [" << currentNR << "] mean [" << (nr / (i + 1)) << "]";
-            LS_ADDMSG(LogService::NOTICE, "main", tmp.str());
+            llog::notice["main"] << "Two POint Correlation have been computed for the Hybrid Catalog [" << currentNR << "] mean [" << (nr / (i + 1)) << "]" << std::endl;
         }
 
-        LS_ADDMSG(LogService::NOTICE, "main", "...Done !");
+        llog::notice["main"] << "...Done !" << std::endl;
 
         rr /= loop;
         nr /= loop;
@@ -83,17 +70,14 @@ int main(int ac, char **av)
         estimator = nn - estimator;
         estimator = estimator - rr;
         estimator /= rr;
-        tmp.str("");
-        tmp << "Landy Szalay Estimator for current catalog returns : " << estimator;
-        LS_ADDMSG(LogService::NOTICE, "main", tmp.str());
+        llog::notice["main"] << "Landy Szalay Estimator for current catalog returns : " << estimator << std::endl;
 
         htm->Delete();
         delete parser;
     }
     else
-        LS_ADDMSG(LogService::FATAL, "main", "Usage : ./LandySzalayEstimator <catalog_file> <radius> <delta>");
+        llog::fatal["main"] << "Usage : ./LandySzalayEstimator <catalog_file> <radius> <delta>" << std::endl;
 
-    LS_ADDMSG(LogService::NOTICE, "main", "Exiting...");
-    LogService::Delete();
+    llog::notice["main"] << "Exiting..." << std::endl;
     return 0;
 }

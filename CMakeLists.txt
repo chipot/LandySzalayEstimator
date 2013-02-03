@@ -28,18 +28,18 @@ set(    core_source_files
 
         sources/htmasciiparser.cpp
         sources/htm.cpp
-        sources/logservice.cpp
         sources/main.cpp
         sources/trixel.cpp
+        sources/log.cc
 )
 set(    core_include_files
 
         includes/htmasciiparser.hpp
         includes/htm.hpp
-        includes/logservice.hpp
         includes/main.hpp
         includes/pointinfo.hpp
         includes/trixel.hpp
+        includes/log.hh
 )
 
 # configure the include path --------------------------------------------------

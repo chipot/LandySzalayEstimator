@@ -5,21 +5,22 @@
 #include <fstream>
 
 // C includes
-#include <math.h>
-#include <time.h>
-#include <stdlib.h>
+#include <cmath>
+#include <ctime>
+#include <cstdlib>
 
 // EIGEN INCLUDES
 #include <Eigen/Dense>
 
 // BLINK includes
-#include "logservice.hpp"
 #include "octahedron.hpp"
 #include "pointinfo.hpp"
 #include "trixel.hpp"
 #include "htmasciiparser.hpp"
 #include "htmconstraint.hpp"
 #include "htm.hpp"
+
+#include "log.hh"
 
 namespace htm {
 
@@ -254,13 +255,13 @@ Constraint* HTM::SetConstraint(PointInfo* pt, double& radius)
         }
         else
         {
-            LS_ADDMSG(LogService::WARNING, "HTM::SetConstraint", "Given right ascension and/or declination has incorrect value");
+            llog::warn["HTM::SetConstraint"] << "Given right ascension and/or declination has incorrect value" << std::endl;
             return NULL;
         }
     }
     else
     {
-        LS_ADDMSG(LogService::NOTICE, "HTM::SetConstraint", "Given <pt> has a NULL value");
+        llog::warn["HTM::SetConstraint"] << "Given <pt> has a NULL value" << std::endl;
     }
 
     return constraint;
@@ -665,12 +666,12 @@ void	HTM::DeleteOctahedron(void)
 /// Create the HTM
 HTM::HTM()
 {
-    LS_ADDMSG(LogService::NOTICE, "HTM", "HTM core created");
+    llog::notice["HTM"] <<  "HTM core created" << std::endl;
 }
 
 HTM::~HTM()
 {
-    LS_ADDMSG(LogService::NOTICE, "HTM", "HTM core deleted");
+    llog::notice["HTM"] <<  "HTM core deleted" << std::endl;
 }
 
 }
