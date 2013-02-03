@@ -40,8 +40,9 @@ void HTMAsciiParser::Parse(std::string& filename)
                 const double nb1 = strtod(str1.c_str(), NULL);
                 const double nb2 = strtod(str2.c_str(), NULL);
 
-                this->_htm->itemsToStore(nb1, nb2);
-                this->_htm->AddPoint(nb1, nb2);
+                this->_cache.emplace_back(nb1, nb2);
+                //this->_htm->itemsToStore(nb1, nb2);
+                //this->_htm->AddPoint(nb1, nb2);
                 nbObj++;
             }
         }
@@ -50,6 +51,15 @@ void HTMAsciiParser::Parse(std::string& filename)
     else
         llog::fatal["HTMAsciiParser"]
             << "Can't Open File : " << filename << std::endl;
+}
+
+void HTMAsciiParser::Populate()
+{
+    for (auto const &p : this->_cache)
+    {
+        this->_htm->itemsToStore(p.first, p.second);
+        this->_htm->AddPoint(p.first, p.second);
+    }
 }
 
 unsigned int& HTMAsciiParser::getNbObj(void)

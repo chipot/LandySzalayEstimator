@@ -15,7 +15,7 @@ int main(int ac, char **av)
         int loop = 100;
         std::string file(av[1]);
         htm::HTM *htm = htm::HTM::GetInstance();
-        auto* parser = new htm::HTMAsciiParser;
+        htm::HTMAsciiParser parser(htm);
 
         std::istringstream stm, stm2;
         stm.str(av[2]);
@@ -27,8 +27,10 @@ int main(int ac, char **av)
 
         llog::notice["main"] << "Computing Normal Catalog..." << std::endl;;
         htm->CreateOctahedron();
-        parser->Parse(file);
+        parser.Parse(file);
+        parser.Populate();
         htm->CreateHTM();
+
         llog::notice["main"] << "HTM Created for Normal Catalog" << std::endl;;
         unsigned int nn = htm->TwoPointsCorrelation(radius, delta);
         std::stringstream tmp;
@@ -47,14 +49,14 @@ int main(int ac, char **av)
             llog::notice["main"] << "Computing loop " << i + 1 << " on " << loop << std::endl;
             htm->DeleteOctahedron();
             htm->CreateOctahedron();
-            parser->UniformNumberGenerator(raMin, raMax, decMin, decMax);
+            parser.UniformNumberGenerator(raMin, raMax, decMin, decMax);
             htm->CreateHTM();
 
             unsigned int currentRR = htm->TwoPointsCorrelation(radius, delta);
             rr += currentRR;
             llog::notice["main"] << "Two Point Correlation have been computed for the Random Catalog [" << currentRR << "] mean [" << (rr / (i + 1)) << "]" << std::endl;
 
-            parser->Parse(file);
+            parser.Populate();
             htm->CreateHTM();
             unsigned int currentNR = htm->TwoPointsCorrelation(radius, delta);
             nr += currentNR;
@@ -73,7 +75,6 @@ int main(int ac, char **av)
         llog::notice["main"] << "Landy Szalay Estimator for current catalog returns : " << estimator << std::endl;
 
         htm->Delete();
-        delete parser;
     }
     else
         llog::fatal["main"] << "Usage : ./LandySzalayEstimator <catalog_file> <radius> <delta>" << std::endl;
