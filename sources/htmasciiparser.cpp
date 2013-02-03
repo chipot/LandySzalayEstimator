@@ -53,7 +53,7 @@ void HTMAsciiParser::Parse(std::string& filename)
             << "Can't Open File : " << filename << std::endl;
 }
 
-void HTMAsciiParser::Populate()
+void HTMAsciiParser::PopulateHTM()
 {
     for (auto const &p : this->_cache)
     {

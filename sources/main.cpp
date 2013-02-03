@@ -24,7 +24,7 @@ int main(int ac, char **av)
         llog::notice["main"] << "Computing Normal Catalog..." << std::endl;;
         htm->CreateOctahedron();
         parser.Parse(file);
-        parser.Populate();
+        parser.PopulateHTM();
         htm->CreateHTM();
 
         llog::notice["main"] << "HTM Created for Normal Catalog" << std::endl;;
@@ -51,7 +51,7 @@ int main(int ac, char **av)
             rr += currentRR;
             llog::notice["main"] << "Two Point Correlation have been computed for the Random Catalog [" << currentRR << "] mean [" << (rr / (i + 1)) << "]" << std::endl;
 
-            parser.Populate();
+            parser.PopulateHTM();
             htm->CreateHTM();
             unsigned int currentNR = htm->TwoPointsCorrelation(radius, delta);
             nr += currentNR;

@@ -12,7 +12,7 @@ class HTMAsciiParser
 {
  public:
   void Parse(std::string& filename);
-  void Populate();
+  void PopulateHTM();
   void UniformNumberGenerator(const double& raMin, const double& raMax, const double& decMin, const double& decMax);
   unsigned int& getNbObj(void);
   // DEFAULT CTOR
