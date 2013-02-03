@@ -52,13 +52,13 @@ int main(int ac, char **av)
 
             unsigned int currentRR = htm->TwoPointsCorrelation(radius, delta);
             rr += currentRR;
-            llog::notice["main"] << "Two POint Correlation have been computed for the Random Catalog [" << currentRR << "] mean [" << (rr / (i + 1)) << "]" << std::endl;
+            llog::notice["main"] << "Two Point Correlation have been computed for the Random Catalog [" << currentRR << "] mean [" << (rr / (i + 1)) << "]" << std::endl;
 
             parser->Parse(file);
             htm->CreateHTM();
             unsigned int currentNR = htm->TwoPointsCorrelation(radius, delta);
             nr += currentNR;
-            llog::notice["main"] << "Two POint Correlation have been computed for the Hybrid Catalog [" << currentNR << "] mean [" << (nr / (i + 1)) << "]" << std::endl;
+            llog::notice["main"] << "Two Point Correlation have been computed for the Hybrid Catalog [" << currentNR << "] mean [" << (nr / (i + 1)) << "]" << std::endl;
         }
 
         llog::notice["main"] << "...Done !" << std::endl;
