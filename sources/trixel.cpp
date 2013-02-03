@@ -100,12 +100,9 @@ trixel* CreateTrixelChild(trixel* parent, unsigned short int& index)
 
     if (parent->_children[index] == NULL)
     {
-        static std::stringstream tmp;
         parent->_children[index] = new trixel();
         InitTrixel(parent->_children[index]);
-        tmp.str("");
-        tmp << parent->_HTMId << index;
-        parent->_children[index]->_HTMId = tmp.str();
+        parent->_children[index]->_HTMId = parent->_HTMId + std::to_string(index);
         Eigen::Vector3d* midPoints = ComputeTrixelMidpoints(parent);
 
         switch (index)
@@ -140,7 +137,6 @@ trixel* CreateTrixelChild(trixel* parent, unsigned short int& index)
     }
     else
     {
-        std::stringstream tmp;
         llog::notice["ICoDF::CreateTrixelChild"]
             << "SubTrixel [" << parent->_HTMId << index << "] already exists"
             << std::endl;
@@ -192,19 +188,14 @@ unsigned short int GetIndex(trixel* trixel, double& ra, double& dec)
         double z = cos(90 - abs(dec));
         Eigen::Vector3d p(x, y, z);
         unsigned short int ret = GetIndex(trixel, p);
-        if (ret == max<unsigned short>())
+        if (ret == max<unsigned short>()) // Is it not good ..?
         {
-            std::stringstream tmp;
-            tmp << " T0 " << std::endl << trixel->_vertices[0] << std::endl
-                << " T1 " << std::endl << trixel->_vertices[1] << std::endl
-                << " T2 " << std::endl << trixel->_vertices[2] << std::endl
-                << " P " << std::endl << p << std::endl;
+            // Did nothing in the first place...
         }
         return ret;
     }
     else
     {
-        std::stringstream tmp;
         llog::notice["HTM"]
             << "Given <ra> [" << ra << "] or <dec> [" << dec << "] is out of bounds"
             << std::endl;
@@ -223,7 +214,7 @@ unsigned short int GetIndex(trixel* trixel, Eigen::Vector3d& p)
         Eigen::Vector3d* v = trixel->_vertices;
         Eigen::Vector3d* w = ComputeTrixelMidpoints(trixel);
 
-        // HERE
+        // HERE // Here WHAT ??!
         if (v[0].cross(w[2]).dot(p) > 0 &&
             w[2].cross(w[1]).dot(p) > 0 &&
             w[1].cross(v[0]).dot(p) > 0)
@@ -242,7 +233,12 @@ unsigned short int GetIndex(trixel* trixel, Eigen::Vector3d& p)
             index = 3;
 
         if (index == max<unsigned short>())
-            std::cout << "Incorrect : " << trixel->_HTMId << std::endl << "--- v1" << std::endl <<  trixel->_vertices[0] << std::endl << "--- v2" << std::endl << trixel->_vertices[1] << std::endl << "--- v3" << std::endl << trixel->_vertices[2] << std::endl << "--- p" << std::endl << p << std::endl;
+            // Shit is incorrect, but why, what, how ? God only knows
+            std::cout << "Incorrect : " << trixel->_HTMId << std::endl
+                << "--- v1" << std::endl <<  trixel->_vertices[0] << std::endl
+                << "--- v2" << std::endl << trixel->_vertices[1] << std::endl
+                << "--- v3" << std::endl << trixel->_vertices[2] << std::endl
+                << "--- p" << std::endl << p << std::endl;
 
         delete [] w;
         return index;

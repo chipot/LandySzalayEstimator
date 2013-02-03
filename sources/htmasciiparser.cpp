@@ -69,23 +69,25 @@ unsigned int& HTMAsciiParser::getNbObj(void)
 
 void    HTMAsciiParser::UniformNumberGenerator(const double& raMin, const double& raMax, const double& decMin, const double& decMax)
 {
-    std::random_device rd;
     unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
     std::mt19937 gen(seed1);
     std::uniform_real_distribution<double> unif1(raMin, raMax);
     std::uniform_real_distribution<double> unif2(decMin, decMax);
+    auto random_ra = [&] () -> double {return unif1(gen);};
+    auto random_dec = [&] () -> double {return unif2(gen);};
+
     for (unsigned int i = 0; i < nbObj; ++i)
     {
-        const double ra = unif1(gen);
-        const double dec = unif2(gen);
+        const double ra = random_ra();
+        const double dec = random_dec();
         this->_htm->AddPoint(ra, dec);
     }
 }
 
-HTMAsciiParser::HTMAsciiParser()
-: nbObj(0)
+HTMAsciiParser::HTMAsciiParser(HTM *htm)
+    : _htm{htm}
+    , nbObj(0)
 {
-    this->_htm = HTM::GetInstance();
 }
 
 HTMAsciiParser::~HTMAsciiParser()
