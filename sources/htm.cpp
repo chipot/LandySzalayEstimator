@@ -351,16 +351,15 @@ void HTM::Delete()
 unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
 {
     unsigned int nbPairs = 0;
-    std::map<std::string, PointInfo*>::iterator it;
 
     double infLimit = radius - delta;
     if (infLimit < 0) infLimit = 0;
     double supLimit = radius + delta;
     Constraint *constraint = new Constraint;
 
-    for (it = this->_points.begin(); it != this->_points.end(); ++it)
+    for (auto &it: this->_points)
     {
-        PointInfo* pt = (*it).second;
+        PointInfo* pt = it.second;
         if (IsCorrectRA(pt->_ra) && IsCorrectDEC(pt->_dec))
         {
             double rProjection = sin(90 - abs(pt->_dec));

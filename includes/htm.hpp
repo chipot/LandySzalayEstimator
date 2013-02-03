@@ -2,7 +2,7 @@
 
 #include <fstream>
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <queue>
 
 namespace htm {
@@ -19,7 +19,7 @@ class HTM
  private:
   Octahedron* _octahedron;				//< base HTM Octahedron
 
-  std::map<std::string, PointInfo*>	_points;	//< map that reference objects by their HTMId
+  std::unordered_map<std::string, PointInfo*>	_points;	//< map that reference objects by their HTMId
 
   std::queue<PointInfo*> _pointList;		//< List of points you are working with
 
