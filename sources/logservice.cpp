@@ -1,13 +1,15 @@
-#include "../includes/logservice.hpp"
+#include <iostream>
+#include <sstream>
+#include <time.h>
+#include <sys/time.h>
+#include "logservice.hpp"
 
-using namespace ICoDF;
-
-LogService* ICoDF::LogService::_singleton = NULL; // initialize the singleton pointer to NULL
+LogService* LogService::_singleton = NULL; // initialize the singleton pointer to NULL
 
 /// ADDMESSAGE
 /// Send a new message to the log service.
 /// Message will be display, write or saved depending on configuration 
-void ICoDF::LogService::AddMessage(short int msgType, std::string module, std::string message)
+void LogService::AddMessage(short int msgType, std::string module, std::string message)
 {
     std::stringstream msg;
     time_t now = time(0);
@@ -41,13 +43,13 @@ void ICoDF::LogService::AddMessage(short int msgType, std::string module, std::s
 
 // SETCONFIGURATION
 // Set a new configuration for log management
-void ICoDF::LogService::SetConfiguration(short int config)
+void LogService::SetConfiguration(short int config)
 {
     this->_config = config;
 }
 
 // TODO : Secure file loading (try,catch)
-bool ICoDF::LogService::CheckFile()
+bool LogService::CheckFile()
 {
     if (!this->_logFile.good() | this->_fileName.empty())
     {
@@ -79,7 +81,7 @@ bool ICoDF::LogService::CheckFile()
 
 /// GETINSTANCE
 /// Create a singleton instance if applicable and/or return the pointer
-LogService* ICoDF::LogService::GetInstance()
+LogService* LogService::GetInstance()
 {
     if (LogService::_singleton == NULL)
     {
@@ -90,18 +92,18 @@ LogService* ICoDF::LogService::GetInstance()
 
 // DELETE
 // Delete the singleton instance.
-void ICoDF::LogService::Delete()
+void LogService::Delete()
 {
     delete LogService::_singleton;
 }
 
 // DEFAULT CTOR
-ICoDF::LogService::LogService()
+LogService::LogService()
 {
 }
 
 // DEFAULT DTOR
-ICoDF::LogService::~LogService()
+LogService::~LogService()
 {
     this->AddMessage(LogService::NOTICE, "LogService", "shutting down log service...");
     if (this->_logFile.good())

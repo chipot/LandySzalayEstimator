@@ -1,14 +1,14 @@
 #pragma once
 
-namespace ICoDF_HTM {
+namespace htm {
 
-struct trixel_s;
+struct trixel;
 
-typedef struct PointInfo_s
+struct PointInfo
 {
-    double _ra;                 // Right ascension
-    double _dec;                // Declination
-    struct trixel_s* _current;  // Current position in HTM
-} PointInfo_t;
+    double          _ra;       // Right ascension
+    double          _dec;      // Declination
+    struct trixel  *_current;  // Current position in HTM
+};
 
-} // ICoDF_HTM
+} // htm

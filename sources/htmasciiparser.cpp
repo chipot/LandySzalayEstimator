@@ -1,6 +1,26 @@
-#include "../includes/htmasciiparser.hpp"
+// C++ includes
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <string>
+#include <random>
+#include <chrono>
 
-void ICoDF_HTM::HTMAsciiParser::Parse(std::string& filename)
+// C includes
+#include <math.h>
+#include <time.h>
+
+//BLINK Logservice
+#include "logservice.hpp"
+
+//BLINK includes
+#include "htm.hpp"
+#include "htmasciiparser.hpp"
+
+namespace htm
+{
+
+void HTMAsciiParser::Parse(std::string& filename)
 {
     std::ifstream   file(filename);
     std::string line(""), str1(""), str2("");
@@ -31,12 +51,12 @@ void ICoDF_HTM::HTMAsciiParser::Parse(std::string& filename)
         LS_ADDMSG(LogService::FATAL, "HTMAsciiParser", "Can't Open File : " + filename);
 }
 
-unsigned int& ICoDF_HTM::HTMAsciiParser::getNbObj(void)
+unsigned int& HTMAsciiParser::getNbObj(void)
 {
     return this->nbObj;
 }
 
-void    ICoDF_HTM::HTMAsciiParser::UniformNumberGenerator(const double& raMin, const double& raMax, const double& decMin, const double& decMax)
+void    HTMAsciiParser::UniformNumberGenerator(const double& raMin, const double& raMax, const double& decMin, const double& decMax)
 {
     std::random_device rd;
     unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
@@ -51,12 +71,14 @@ void    ICoDF_HTM::HTMAsciiParser::UniformNumberGenerator(const double& raMin, c
     }
 }
 
-ICoDF_HTM::HTMAsciiParser::HTMAsciiParser()
+HTMAsciiParser::HTMAsciiParser()
 : nbObj(0)
 {
     this->_htm = HTM::GetInstance();
 }
 
-ICoDF_HTM::HTMAsciiParser::~HTMAsciiParser()
+HTMAsciiParser::~HTMAsciiParser()
 {
+}
+
 }

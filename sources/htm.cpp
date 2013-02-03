@@ -1,11 +1,34 @@
-#include "../includes/htm.hpp"
+// C++ includes
+#include <iomanip>
+#include <algorithm>
+#include <sstream>
+#include <fstream>
 
-HTM* ICoDF_HTM::HTM::_singleton = NULL; // Initialize the singleton to NULL.
+// C includes
+#include <math.h>
+#include <time.h>
+#include <stdlib.h>
+
+// EIGEN INCLUDES
+#include <Eigen/Dense>
+
+// BLINK includes
+#include "logservice.hpp"
+#include "octahedron.hpp"
+#include "pointinfo.hpp"
+#include "trixel.hpp"
+#include "htmasciiparser.hpp"
+#include "htmconstraint.hpp"
+#include "htm.hpp"
+
+namespace htm {
+
+HTM* HTM::_singleton = NULL; // Initialize the singleton to NULL.
 
 // ADD POINT
-void ICoDF_HTM::HTM::AddPoint(const double& ra, const double& dec)
+void HTM::AddPoint(const double& ra, const double& dec)
 {
-    PointInfo_t* info = new PointInfo_t;
+    PointInfo* info = new PointInfo;
     info->_ra = ra;
     info->_dec = dec;
     if (this->SelectRootTrixel(info))
@@ -15,9 +38,9 @@ void ICoDF_HTM::HTM::AddPoint(const double& ra, const double& dec)
 }
 
 // CreateHTM
-bool ICoDF_HTM::HTM::CreateHTM()
+bool HTM::CreateHTM()
 {
-    PointInfo_t* pt;
+    PointInfo* pt;
     while (!this->_pointList.empty())
     {
         pt = _pointList.front();
@@ -28,7 +51,7 @@ bool ICoDF_HTM::HTM::CreateHTM()
 }
 
 // AssignPoint
-std::string ICoDF_HTM::HTM::AssignPoint(PointInfo_t* pt)
+std::string HTM::AssignPoint(PointInfo* pt)
 {
     if (pt->_current->_nbChildObject > 1)
     {
@@ -55,7 +78,7 @@ std::string ICoDF_HTM::HTM::AssignPoint(PointInfo_t* pt)
     {
         ++pt->_current->_nbChildObject;
         unsigned short int indexCurrent = GetIndex(pt->_current, pt);
-        PointInfo_t* old = pt->_current->_info;
+        PointInfo* old = pt->_current->_info;
         pt->_current->_info = NULL;
         unsigned short int indexOld = GetIndex(old->_current, old);
         if (indexCurrent == (unsigned short int)~0)
@@ -90,17 +113,17 @@ std::string ICoDF_HTM::HTM::AssignPoint(PointInfo_t* pt)
     return pt->_current->_HTMId;
 }
 
-double ICoDF_HTM::HTM::getMinRa(void)
+double HTM::getMinRa(void)
 {
     return this->_raQueue.top();
 }
 
-double ICoDF_HTM::HTM::getMinDec(void)
+double HTM::getMinDec(void)
 {
     return this->_decQueue.top();
 }
 
-double ICoDF_HTM::HTM::getMaxRa(void)
+double HTM::getMaxRa(void)
 {
     double raMax;
     while (!this->_raQueue.empty())
@@ -111,7 +134,7 @@ double ICoDF_HTM::HTM::getMaxRa(void)
     return raMax;
 }
 
-double ICoDF_HTM::HTM::getMaxDec(void)
+double HTM::getMaxDec(void)
 {
     double decMax;
     while (!this->_decQueue.empty())
@@ -122,15 +145,15 @@ double ICoDF_HTM::HTM::getMaxDec(void)
     return decMax;
 }
 
-void ICoDF_HTM::HTM::itemsToStore(const double& ra, const double& dec)
+void HTM::itemsToStore(const double& ra, const double& dec)
 {
     this->_raQueue.push(ra);
     this->_decQueue.push(dec);
 }
 
-HTMConstraint_t* ICoDF_HTM::HTM::SetConstraint(PointInfo_t* pt, double& radius)
+Constraint* HTM::SetConstraint(PointInfo* pt, double& radius)
 {
-    HTMConstraint_t* constraint = NULL;
+    Constraint* constraint = NULL;
     if (pt != NULL)
     {
 
@@ -141,9 +164,9 @@ HTMConstraint_t* ICoDF_HTM::HTM::SetConstraint(PointInfo_t* pt, double& radius)
             double y = rProjection * sin(pt->_ra);
             double z = cos(90 - abs(pt->_dec));
             Eigen::Vector3d p(x, y, z);
-            constraint = new HTMConstraint_t;
-            static std::queue<trixel_t*> workingList;
-            std::queue<trixel_t*>().swap(workingList);
+            constraint = new Constraint;
+            static std::queue<trixel*> workingList;
+            std::queue<trixel*>().swap(workingList);
 
             for(unsigned int i = 0; i < 4; ++i)
             {
@@ -184,7 +207,7 @@ HTMConstraint_t* ICoDF_HTM::HTM::SetConstraint(PointInfo_t* pt, double& radius)
             }
             while (workingList.size() > 0)
             {
-                trixel_t* tmp = workingList.front();
+                trixel* tmp = workingList.front();
                 workingList.pop();
                 unsigned short int inside = 0;
                 if (p.dot(tmp->_vertices[0]) > radius)
@@ -231,7 +254,7 @@ HTMConstraint_t* ICoDF_HTM::HTM::SetConstraint(PointInfo_t* pt, double& radius)
         }
         else
         {
-            LS_ADDMSG(LogService::WARNING, "ICoDF_HTM::HTM::SetConstraint", "Given right ascension and/or declination has incorrect value");
+            LS_ADDMSG(LogService::WARNING, "HTM::SetConstraint", "Given right ascension and/or declination has incorrect value");
             return NULL;
         }
     }
@@ -243,7 +266,7 @@ HTMConstraint_t* ICoDF_HTM::HTM::SetConstraint(PointInfo_t* pt, double& radius)
     return constraint;
 }
 
-inline std::pair<double, double>       ICoDF_HTM::HTM::CalcCoordPoint(std::pair<double, double>& a, std::pair<double, double>& b)
+inline std::pair<double, double>       HTM::CalcCoordPoint(std::pair<double, double>& a, std::pair<double, double>& b)
 {
     std::pair<double, double>	result;
 
@@ -252,7 +275,7 @@ inline std::pair<double, double>       ICoDF_HTM::HTM::CalcCoordPoint(std::pair<
     return result;
 }
 
-bool ICoDF_HTM::HTM::SelectRootTrixel(PointInfo_t* pt)
+bool HTM::SelectRootTrixel(PointInfo* pt)
 {
     for (int i = 0; i < 8; ++i)
     {
@@ -274,12 +297,12 @@ bool ICoDF_HTM::HTM::SelectRootTrixel(PointInfo_t* pt)
     return false;
 }
 
-inline double				ICoDF_HTM::HTM::Scal(std::pair<double, double>& v1, std::pair<double, double>& v2) const
+inline double				HTM::Scal(std::pair<double, double>& v1, std::pair<double, double>& v2) const
 {
     return ((v1.first * v2.first) + (v1.second * v2.second));
 }
 
-bool				ICoDF_HTM::HTM::CheckPointInTriangle(std::pair<double, double> A,
+bool				HTM::CheckPointInTriangle(std::pair<double, double> A,
                                                          std::pair<double, double> B,
                                                          std::pair<double, double> C,
                                                          std::pair<double, double> P)
@@ -303,7 +326,7 @@ bool				ICoDF_HTM::HTM::CheckPointInTriangle(std::pair<double, double> A,
 }
 
 /// Create the instance of the HTM core if applicable and/or return a pointer to it.
-HTM* ICoDF_HTM::HTM::GetInstance()
+HTM* HTM::GetInstance()
 {
     if (HTM::_singleton == NULL)
     {
@@ -314,7 +337,7 @@ HTM* ICoDF_HTM::HTM::GetInstance()
 
 /// DELETE
 /// Delete the instance of the HTM core
-void ICoDF_HTM::HTM::Delete()
+void HTM::Delete()
 {
     if (HTM::_singleton != NULL)
     {
@@ -324,19 +347,19 @@ void ICoDF_HTM::HTM::Delete()
 }
 
 /// TwoPointsCorrelation
-unsigned int ICoDF_HTM::HTM::TwoPointsCorrelation(double& radius, double& delta)
+unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
 {
     unsigned int nbPairs = 0;
-    std::map<std::string, PointInfo_t*>::iterator it;
+    std::map<std::string, PointInfo*>::iterator it;
 
     double infLimit = radius - delta;
     if (infLimit < 0) infLimit = 0;
     double supLimit = radius + delta;
-    HTMConstraint_t *constraint = new HTMConstraint_t;
+    Constraint *constraint = new Constraint;
 
     for (it = this->_points.begin(); it != this->_points.end(); ++it)
     {
-        PointInfo_t* pt = (*it).second;
+        PointInfo* pt = (*it).second;
         if (IsCorrectRA(pt->_ra) && IsCorrectDEC(pt->_dec))
         {
             double rProjection = sin(90 - abs(pt->_dec));
@@ -345,8 +368,8 @@ unsigned int ICoDF_HTM::HTM::TwoPointsCorrelation(double& radius, double& delta)
             double z = cos(90 - abs(pt->_dec));
             Eigen::Vector3d p(x, y, z);
 
-            static std::queue<trixel_t*> workingList;
-            std::queue<trixel_t*>().swap(workingList);
+            static std::queue<trixel*> workingList;
+            std::queue<trixel*>().swap(workingList);
 
             for (unsigned int i = 0; i < 4; ++i)
             {
@@ -395,7 +418,7 @@ unsigned int ICoDF_HTM::HTM::TwoPointsCorrelation(double& radius, double& delta)
             }
             while (workingList.size() > 0)
             {
-                trixel_t* tmp = workingList.front();
+                trixel* tmp = workingList.front();
                 workingList.pop();
                 unsigned short int infInside = 0;
                 unsigned short int supInside = 0;
@@ -465,7 +488,7 @@ unsigned int ICoDF_HTM::HTM::TwoPointsCorrelation(double& radius, double& delta)
 }
 
 /// SelectOctahedronTrixel
-trixel_t* ICoDF_HTM::HTM::SelectRootOctahedronTrixel(const double& ra, const double& dec)
+trixel* HTM::SelectRootOctahedronTrixel(const double& ra, const double& dec)
 {
     unsigned int trixelNumber = 0;
 
@@ -509,10 +532,10 @@ trixel_t* ICoDF_HTM::HTM::SelectRootOctahedronTrixel(const double& ra, const dou
     return this->_octahedron->_rootTrixels[trixelNumber];
 }
 
-void	ICoDF_HTM::HTM::CreateOctahedron(void)
+void	HTM::CreateOctahedron(void)
 {
-    this->_octahedron = new Octahedron_t;
-    this->_octahedron->_rootTrixels = new trixel_t*[8];
+    this->_octahedron = new Octahedron;
+    this->_octahedron->_rootTrixels = new trixel*[8];
     Eigen::Vector3d v0( 0,  0,  1);
     Eigen::Vector3d v1( 1,  0,  0);
     Eigen::Vector3d v2( 0,  1,  1);
@@ -554,7 +577,7 @@ void	ICoDF_HTM::HTM::CreateOctahedron(void)
     this->_octahedron->_rootTrixels[7]->_vertices[2] = v1;
 }
 
-void	ICoDF_HTM::HTM::Display(trixel_t* current, std::ofstream& fstream)
+void	HTM::Display(trixel* current, std::ofstream& fstream)
 {
     if (current != NULL)
     {
@@ -569,7 +592,7 @@ void	ICoDF_HTM::HTM::Display(trixel_t* current, std::ofstream& fstream)
                     {
                         if (this->_points[current->_children[0]->_HTMId])
                         {
-                            PointInfo_t* info = this->_points[current->_children[0]->_HTMId];
+                            PointInfo* info = this->_points[current->_children[0]->_HTMId];
                             fstream << "Item stored at trixel : " << current->_children[0]->_HTMId << " with right ascension and declinaison at " << info->_ra << " " << info->_dec << std::endl;
                         }
                     }
@@ -577,7 +600,7 @@ void	ICoDF_HTM::HTM::Display(trixel_t* current, std::ofstream& fstream)
                     {
                         if (this->_points[current->_children[1]->_HTMId])
                         {
-                            PointInfo_t* info = this->_points[current->_children[1]->_HTMId];
+                            PointInfo* info = this->_points[current->_children[1]->_HTMId];
                             fstream << "Item stored at trixel : " << current->_children[1]->_HTMId << " with right ascension and declinaison at " << info->_ra << " " << info->_dec << std::endl;
                         }
                     }
@@ -585,7 +608,7 @@ void	ICoDF_HTM::HTM::Display(trixel_t* current, std::ofstream& fstream)
                     {
                         if (this->_points[current->_children[2]->_HTMId])
                         {
-                            PointInfo_t* info = this->_points[current->_children[2]->_HTMId];
+                            PointInfo* info = this->_points[current->_children[2]->_HTMId];
                             fstream << "Item stored at trixel : " << current->_children[2]->_HTMId << " with right ascension and declinaison at " << info->_ra << " " << info->_dec << std::endl;
                         }
                     }
@@ -593,7 +616,7 @@ void	ICoDF_HTM::HTM::Display(trixel_t* current, std::ofstream& fstream)
                     {
                         if (this->_points[current->_children[3]->_HTMId])
                         {
-                            PointInfo_t* info = this->_points[current->_children[3]->_HTMId];
+                            PointInfo* info = this->_points[current->_children[3]->_HTMId];
                             fstream << "Item stored at trixel : " << current->_children[3]->_HTMId << " with right ascension and declinaison at " << info->_ra << " " << info->_dec << std::endl;
                         }
                     }
@@ -603,7 +626,7 @@ void	ICoDF_HTM::HTM::Display(trixel_t* current, std::ofstream& fstream)
     }
 }
 
-void	ICoDF_HTM::HTM::FreeAllTrixels(trixel_t* current)
+void	HTM::FreeAllTrixels(trixel* current)
 {
     if (current != NULL)
     {
@@ -622,7 +645,7 @@ void	ICoDF_HTM::HTM::FreeAllTrixels(trixel_t* current)
     }
 }
 
-void	ICoDF_HTM::HTM::DeleteOctahedron(void)
+void	HTM::DeleteOctahedron(void)
 {
     std::ofstream fstream;
     fstream.open("log");
@@ -640,12 +663,14 @@ void	ICoDF_HTM::HTM::DeleteOctahedron(void)
 }
 
 /// Create the HTM
-ICoDF_HTM::HTM::HTM()
+HTM::HTM()
 {
     LS_ADDMSG(LogService::NOTICE, "HTM", "HTM core created");
 }
 
-ICoDF_HTM::HTM::~HTM()
+HTM::~HTM()
 {
     LS_ADDMSG(LogService::NOTICE, "HTM", "HTM core deleted");
+}
+
 }

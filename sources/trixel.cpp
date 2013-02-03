@@ -1,4 +1,17 @@
-#include "../includes/trixel.hpp"
+// C Includes
+#include <assert.h>
+
+// C++ Includes
+#include <iostream>
+#include <sstream>
+
+// Eigen Includes
+#include <Eigen/Dense>
+
+// ICoDF
+#include "logservice.hpp"
+#include "pointinfo.hpp"
+#include "trixel.hpp"
 
 namespace /* annon */ {
 
@@ -11,9 +24,11 @@ max()
 
 }
 
+namespace htm {
+
 // ------------------------------------------------------------------------------
 // CREATETRIXELCHILDREN
-trixel_t** ICoDF_HTM::CreateTrixelChildren(trixel_t *parent)
+trixel** CreateTrixelChildren(trixel *parent)
 {
     if (parent->_children != NULL)
     {
@@ -27,7 +42,7 @@ trixel_t** ICoDF_HTM::CreateTrixelChildren(trixel_t *parent)
     }
     else
     {
-        parent->_children = new trixel_t*[4];
+        parent->_children = new trixel*[4];
         for (int i = 0; i <  4; ++i)
         {
             parent->_children[i] = NULL;
@@ -37,7 +52,7 @@ trixel_t** ICoDF_HTM::CreateTrixelChildren(trixel_t *parent)
 }
 
 // -------------------------------------------------------------------------------
-Eigen::Vector3d* ICoDF_HTM::ComputeTrixelMidpoints(trixel_t* trixel)
+Eigen::Vector3d* ComputeTrixelMidpoints(trixel* trixel)
 {
     static Eigen::Vector3d tmp;
     Eigen::Vector3d* midPoints = new Eigen::Vector3d[3];
@@ -54,9 +69,9 @@ Eigen::Vector3d* ICoDF_HTM::ComputeTrixelMidpoints(trixel_t* trixel)
 
 // -------------------------------------------------------------------------------
 // CREATEROOTTRIXEL
-trixel_t* ICoDF_HTM::CreateRootTrixel(std::string HTMId)
+trixel* CreateRootTrixel(std::string HTMId)
 {
-    trixel_t* trixel = new trixel_t();
+    trixel* trixel = new struct trixel();
     InitTrixel(trixel);
     trixel->_HTMId = HTMId;
     return trixel;
@@ -71,7 +86,7 @@ trixel_t* ICoDF_HTM::CreateRootTrixel(std::string HTMId)
 //   Set vertices that defines the new subtrixel
 // else display a message
 // return the pointer
-trixel_t* ICoDF_HTM::CreateTrixelChild(trixel_t* parent, unsigned short int& index)
+trixel* CreateTrixelChild(trixel* parent, unsigned short int& index)
 {
     if (parent->_children == NULL)
     {
@@ -84,7 +99,7 @@ trixel_t* ICoDF_HTM::CreateTrixelChild(trixel_t* parent, unsigned short int& ind
     if (parent->_children[index] == NULL)
     {
         static std::stringstream tmp;
-        parent->_children[index] = new trixel_t();
+        parent->_children[index] = new trixel();
         InitTrixel(parent->_children[index]);
         tmp.str("");
         tmp << parent->_HTMId << index;
@@ -132,7 +147,7 @@ trixel_t* ICoDF_HTM::CreateTrixelChild(trixel_t* parent, unsigned short int& ind
 
 // -------------------------------------------------------------------
 // CLEARTRIXELCHILDREN
-void ICoDF_HTM::ClearTrixelChildren(trixel_t *parent)
+void ClearTrixelChildren(trixel *parent)
 {
     if (parent->_children != NULL)
     {
@@ -151,7 +166,7 @@ void ICoDF_HTM::ClearTrixelChildren(trixel_t *parent)
 
 // ---------------------------------------------------------------------
 // CLEARTRIXELCHILDREN
-void ICoDF_HTM::ClearTrixel(trixel_t *trixel)
+void ClearTrixel(trixel *trixel)
 {
     if (trixel->_vertices != NULL)
     {
@@ -163,7 +178,7 @@ void ICoDF_HTM::ClearTrixel(trixel_t *trixel)
 
 // ---------------------------------------------------------------------
 // GETINDEX (astral coordinates version)
-unsigned short int ICoDF_HTM::GetIndex(trixel_t* trixel, double& ra, double& dec)
+unsigned short int GetIndex(trixel* trixel, double& ra, double& dec)
 {
     if (IsCorrectRA(ra) && IsCorrectDEC(dec))
     {
@@ -194,7 +209,7 @@ unsigned short int ICoDF_HTM::GetIndex(trixel_t* trixel, double& ra, double& dec
 
 // --------------------------------------------------------------------
 // GETINDEX (vector version)
-unsigned short int ICoDF_HTM::GetIndex(trixel_t* trixel, Eigen::Vector3d& p)
+unsigned short int GetIndex(trixel* trixel, Eigen::Vector3d& p)
 {
     if (trixel != NULL && NULL != trixel->_vertices)
     {
@@ -229,14 +244,14 @@ unsigned short int ICoDF_HTM::GetIndex(trixel_t* trixel, Eigen::Vector3d& p)
     }
     else
     {
-        LS_ADDMSG(LogService::WARNING, "ICoDF_HTM::GetIndex", "Given <trixel> or its vertices has a NULL value");
+        LS_ADDMSG(LogService::WARNING, "GetIndex", "Given <trixel> or its vertices has a NULL value");
         return max<unsigned short>();
     }
 }
 
 // --------------------------------------------------------------------
 // GETINDEX (PointInfo version)
-unsigned short int ICoDF_HTM::GetIndex(trixel_t* trixel, PointInfo_t* pointInfo)
+unsigned short int GetIndex(trixel* trixel, PointInfo* pointInfo)
 {
     unsigned short int index = GetIndex(trixel, pointInfo->_ra, pointInfo->_dec);
     return index;
@@ -244,11 +259,11 @@ unsigned short int ICoDF_HTM::GetIndex(trixel_t* trixel, PointInfo_t* pointInfo)
 
 // --------------------------------------------------------------------
 // INITTRIXEL
-void ICoDF_HTM::InitTrixel(trixel_t* trixel)
+void InitTrixel(trixel* trixel)
 {
     if (trixel == NULL)
     {
-        LS_ADDMSG(LogService::WARNING, "ICoDF_HTM::InitTrixel", "Given <trixel> has a NULL value");
+        LS_ADDMSG(LogService::WARNING, "InitTrixel", "Given <trixel> has a NULL value");
     }
     else
     {
@@ -264,7 +279,7 @@ void ICoDF_HTM::InitTrixel(trixel_t* trixel)
 
 // --------------------------------------------------------------------
 // ISCORRECTRA
-bool ICoDF_HTM::IsCorrectRA(double& ra)
+bool IsCorrectRA(double& ra)
 {
     if (ra >= 0 && ra < 360)
         return true;
@@ -273,9 +288,11 @@ bool ICoDF_HTM::IsCorrectRA(double& ra)
 
 // --------------------------------------------------------------------
 // ISCORRECTDEC
-bool ICoDF_HTM::IsCorrectDEC(double& dec)
+bool IsCorrectDEC(double& dec)
 {
     if (dec > -90 && dec <= 90)
         return true;
     return false;
+}
+
 }

@@ -1,30 +1,12 @@
 #pragma once
 
-// C++ includes
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
 #include <string>
-#include <random>
-#include <chrono>
 
-// C includes
-#include <math.h>
-#include <time.h>
+namespace htm {
 
-//BLINK Logservice
-#include "logservice.hpp"
-
-//BLINK includes
-#include "htm.hpp"
-
-using namespace ICoDF;
-using namespace ICoDF_HTM;
-
-namespace ICoDF_HTM
-{
 class HTM;
-class HTMAsciiParser //: public IHTMParser
+
+class HTMAsciiParser
 {
  public:
   void Parse(std::string& filename);
@@ -39,4 +21,5 @@ class HTMAsciiParser //: public IHTMParser
   HTM* _htm;
   unsigned int nbObj;
 };
+
 }

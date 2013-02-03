@@ -1,8 +1,11 @@
-#include "../includes/main.hpp"
+#include <iostream>
+#include <limits>
 #include <unistd.h>
+#include <sstream>
 
-using namespace ICoDF;
-using namespace ICoDF_HTM;
+#include "logservice.hpp"
+#include "htm.hpp"
+#include "htmasciiparser.hpp"
 
 int main(int ac, char **av)
 {
@@ -13,8 +16,8 @@ int main(int ac, char **av)
     {
         int loop = 100;
         std::string file(av[1]);
-        HTM *htm = HTM::GetInstance();
-        HTMAsciiParser* parser = new HTMAsciiParser;
+        htm::HTM *htm = htm::HTM::GetInstance();
+        auto* parser = new htm::HTMAsciiParser;
 
         std::istringstream stm, stm2;
         stm.str(av[2]);

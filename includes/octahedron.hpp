@@ -1,14 +1,18 @@
 #pragma once
+#ifndef OCTAHEDRON_6769ZRSD
+#define OCTAHEDRON_6769ZRSD
 
-#include <vector>
-#include "trixel.hpp"
+namespace htm {
 
-namespace ICoDF_HTM {
+struct trixel;
 
-typedef struct Octahedron_s
+struct Octahedron
 {
     std::string _name;
-    trixel_t** _rootTrixels; // [0] = S0, [4] = N0
-} Octahedron_t;
+    trixel** _rootTrixels; // [0] = S0, [4] = N0
+};
 
-} // ICoDF_HTM
+}
+
+#endif /* end of include guard: OCTAHEDRON_6769ZRSD */
+

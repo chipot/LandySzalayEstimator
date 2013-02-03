@@ -1,67 +1,53 @@
 #ifndef __BLINK_HTM_TRIXEL_HPP__
 #define __BLINK_HTM_TRIXEL_HPP__
 
-// C Includes
-#include <assert.h>
-
-// C++ Includes
 #include <string>
-#include <sstream>
-
-// Eigen Includes
 #include <Eigen/Dense>
 
-// ICoDF
-#include "logservice.hpp"
-#include "pointinfo.hpp"
+namespace htm {
 
-using namespace ICoDF;
-using namespace ICoDF_HTM;
-
-namespace ICoDF_HTM {
-
-struct PointInfo_s;
+struct PointInfo;
 
 /// Structure that define a trixel (htm base object)
-typedef struct trixel_s
+struct trixel
 {
-    struct trixel_s**       _children;  //< trixel's subtrixels
-    Eigen::Vector3d*        _vertices;  //< Trixel's vertices
+    struct trixel         **_children;  //< trixel's subtrixels
+    Eigen::Vector3d        *_vertices;  //< Trixel's vertices
     bool                    _reverse;   //< is an upside-down trixel ?
     std::string             _HTMId;     //< N10120112121101
     unsigned int            _nbChildObject; //< Number of objects contained in this trixel.
-    struct PointInfo_s*     _info;      //< Point information structure for the actual 
-} trixel_t;
+    struct PointInfo       *_info;      //< Point information structure for the actual 
+};
 
-/// Delte the given trixel (but not the PointInfo_t)
-void ClearTrixel(trixel_t* trixel);
+/// Delte the given trixel (but not the PointInfo)
+void ClearTrixel(trixel* trixel);
 
 /// Delete a trixel's children
-void ClearTrixelChildren(trixel_t *parent);
+void ClearTrixelChildren(trixel *parent);
 
 /// Compute a trixel's midpoint vectors
-Eigen::Vector3d* ComputeTrixelMidpoints(trixel_t* trixel);
+Eigen::Vector3d* ComputeTrixelMidpoints(trixel* trixel);
 
 /// Create A Root Trixel
-trixel_t* CreateRootTrixel(std::string HTMId);
+trixel* CreateRootTrixel(std::string HTMId);
 
 /// Create a new trixel from its parent information and index
-trixel_t* CreateTrixelChild(trixel_t *parent, unsigned short int& index);
+trixel* CreateTrixelChild(trixel *parent, unsigned short int& index);
 
 /// Create a container for the 4 trixels that correspond to a new level 
-trixel_t** CreateTrixelChildren(trixel_t* parent);
+trixel** CreateTrixelChildren(trixel* parent);
 
 /// Return which subtrixel the point is (ra dec version)
-unsigned short int GetIndex(trixel_t* trixel, double& ra, double& dec);
+unsigned short int GetIndex(trixel* trixel, double& ra, double& dec);
 
 /// Return which subtrixel the point is (vector version)
-unsigned short int GetIndex(trixel_t* trixel, Eigen::Vector3d& pointVector);
+unsigned short int GetIndex(trixel* trixel, Eigen::Vector3d& pointVector);
 
 /// Return which subtrixel the point is (object version)
-unsigned short int GetIndex(trixel_t* trixel, PointInfo_t* object);
+unsigned short int GetIndex(trixel* trixel, PointInfo* object);
 
 /// Init a new trixel with default values
-void InitTrixel(trixel_t* trixel);
+void InitTrixel(trixel* trixel);
 
 /// Check if the given right ascension value is correct
 bool IsCorrectRA(double& ra);
@@ -69,6 +55,6 @@ bool IsCorrectRA(double& ra);
 /// Check if the given declination value is correct
 bool IsCorrectDEC(double& dec);
 
-} // ICoDF_HTM
+} // htm
 
 #endif /* !__BLINK_HTM_TRIXEL_HPP__ */

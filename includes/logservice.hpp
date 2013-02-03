@@ -1,19 +1,14 @@
 #pragma once
 
-#include <iostream>
 #include <fstream>
-#include <sstream>
-#include <time.h>
-#include <sys/time.h>
 
 // USE THIS COMMAND TO ADD A NEW MESSAGE
 // X = log type (see static const (NOTICE|WARNING|FATAL) below)
 // Y = module's name (string)
 // Z = log message (string)
-#define LS_ADDMSG(x,y,z) ICoDF::LogService::GetInstance()->AddMessage(x, y, z)
+#define LS_ADDMSG(x,y,z) LogService::GetInstance()->AddMessage(x, y, z)
 #define MSG_SQUELLETON(x) x << date << " : " << module << " => " << message;
 
-namespace ICoDF {
 // LogService manages all log system for the BLINK project.
 // For now it is able to wirte logs on a file or on the term.
 // Todo : also manages log using type and date (priority queue)
@@ -51,14 +46,14 @@ class LogService
   static const short int LS_PRINT_ON_COUT = LS_PRINT_NOTICE_ON_COUT | LS_PRINT_WARNING_ON_COUT | LS_PRINT_FATAL_ON_COUT; //
 
  private:
-  short int		_config; //< Configuration table
+  short int	            _config; //< Configuration table
 
-  std::fstream	_logFile; //< file stream
+  std::fstream          _logFile; //< file stream
 
-  std::string		_fileName; //< log file's name
+  std::string           _fileName; //< log file's name
 
  private:
-  static LogService *_singleton; //< singleton ptr for the service.
+  static LogService    *_singleton; //< singleton ptr for the service.
 
  public:
   /// Return a pointer the the log service instance.
@@ -74,5 +69,3 @@ class LogService
   // DEFAULT DTOR
   ~LogService(void);
 };
-
-} // ICoDF

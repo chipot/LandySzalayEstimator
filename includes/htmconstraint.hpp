@@ -2,18 +2,17 @@
 #define __ICODF_HTM_HTMCONSTRAINT__H__
 
 // C++ includes
-#include <list>
+#include <vector>
 
-// ICoDF includes
-#include "trixel.hpp"
+namespace htm {
 
-namespace ICoDF_HTM {
+struct trixel;
 
-typedef struct HTMConstraint_s
+struct Constraint
 {
-    std::list<trixel_t*> _inside;
-    std::list<trixel_t*> _partial;
-} HTMConstraint_t;
+    std::vector<trixel*> _inside;
+    std::vector<trixel*> _partial;
+};
 
 } // ICoDF_HTM
 
