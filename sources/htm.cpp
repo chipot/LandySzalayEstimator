@@ -647,11 +647,11 @@ void	HTM::FreeAllTrixels(trixel* current)
 
 void	HTM::DeleteOctahedron(void)
 {
-    std::ofstream fstream;
-    fstream.open("log");
-    for (auto i = 0; i < 8; ++i)
-        this->Display(this->_octahedron->_rootTrixels[i], fstream);
-    fstream.close();
+    //std::ofstream fstream;
+    //fstream.open("log");
+    //for (auto i = 0; i < 8; ++i)
+    //    this->Display(this->_octahedron->_rootTrixels[i], fstream);
+    //fstream.close();
     for (auto i = 0; i < 8; ++i)
         this->FreeAllTrixels(this->_octahedron->_rootTrixels[i]);
     for (auto it = this->_points.begin(); it != this->_points.end(); ++it)
