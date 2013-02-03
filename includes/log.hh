@@ -4,6 +4,7 @@
 
 #include <ctime>
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <utility>
 
@@ -78,19 +79,25 @@ class notifier
 
         notifier_forward(notifier_forward const &f) = delete;
 
+        ~notifier_forward()
+        {
+            this->_notifier._out << this->_cache.str();
+        }
+
         template <typename T>
         notifier_forward const & operator << (T &&type) const
         {
-            this->_notifier._out << std::forward<T>(type);
+            this->_cache << std::forward<T>(type);
             return *this;
         }
         notifier_forward const & operator << (std::ostream & (*func)(std::ostream &)) const
         {
-            func(this->_notifier._out);
+            func(this->_cache);
             return *this;
         }
      private:
         notifier &_notifier;
+        std::stringstream mutable _cache;
     };
 
     notifier()
