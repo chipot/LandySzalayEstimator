@@ -10,6 +10,8 @@
 #include <math.h>
 #include <time.h>
 
+#include <unistd.h>
+
 //BLINK Logservice
 #include "log.hh"
 
@@ -67,8 +69,9 @@ unsigned int HTMAsciiParser::getNbObj(void)
 
 void    HTMAsciiParser::UniformNumberGenerator(const double& raMin, const double& raMax, const double& decMin, const double& decMax)
 {
-    unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
-    std::mt19937 gen(seed1);
+    static unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count() * getpid();
+    static std::mt19937_64 gen(seed1);
+
     std::uniform_real_distribution<double> unif1(raMin, raMax);
     std::uniform_real_distribution<double> unif2(decMin, decMax);
     auto random_ra = [&] () -> double {return unif1(gen);};
