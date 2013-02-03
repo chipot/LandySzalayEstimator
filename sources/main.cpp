@@ -42,10 +42,11 @@ int main(int ac, char **av)
         for (unsigned int i = 0; i != loop; ++i)
         {
             llog::notice["main"] << "Computing loop " << i + 1 << " on " << loop << std::endl;
-            htm->DeleteOctahedron();
-            htm->CreateOctahedron();
+            htm->DeleteOctahedron(); // Oh my God
+            htm->CreateOctahedron(); // So that's why...
+            // This is stupid: This function add points into the HTM !!!!
             parser.UniformNumberGenerator(raMin, raMax, decMin, decMax);
-            htm->CreateHTM();
+            htm->CreateHTM(); // This one just pop points from a list filled by the previous call
 
             unsigned int currentRR = htm->TwoPointsCorrelation(radius, delta);
             rr += currentRR;
@@ -60,13 +61,20 @@ int main(int ac, char **av)
 
         llog::notice["main"] << "...Done !" << std::endl;
 
+        // rr and nr are modified in the loop.. nn is defined by the Two P. C.
+        // at the beginning
         rr /= loop;
         nr /= loop;
+
         double estimator = 0;
-        estimator = 2 * nr;
-        estimator = nn - estimator;
-        estimator = estimator - rr;
-        estimator /= rr;
+        {
+            double nn_d = nn;
+            double nr_d = nr;
+            double rr_d = rr;
+
+            estimator = (nn_d - (2 * nr_d) - rr_d) / rr_d;
+        }
+
         llog::notice["main"] << "Landy Szalay Estimator for current catalog returns : " << estimator << std::endl;
 
         htm->Delete();

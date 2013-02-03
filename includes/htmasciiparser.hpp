@@ -14,7 +14,7 @@ class HTMAsciiParser
   void Parse(std::string& filename);
   void PopulateHTM();
   void UniformNumberGenerator(const double& raMin, const double& raMax, const double& decMin, const double& decMax);
-  unsigned int& getNbObj(void);
+  unsigned int getNbObj(void);
   // DEFAULT CTOR
   HTMAsciiParser(HTM *);
 
@@ -23,7 +23,6 @@ class HTMAsciiParser
  private:
   HTM* _htm;
   std::vector<std::pair<double, double>> _cache;
-  unsigned int nbObj;
 };
 
 }

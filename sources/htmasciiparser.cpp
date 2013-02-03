@@ -25,7 +25,6 @@ void HTMAsciiParser::Parse(std::string& filename)
     std::ifstream   file(filename);
     std::string line(""), str1(""), str2("");
     size_t  pos1, pos2;
-    nbObj = 0;
 
     if (file)
     {
@@ -43,7 +42,6 @@ void HTMAsciiParser::Parse(std::string& filename)
                 this->_cache.emplace_back(nb1, nb2);
                 //this->_htm->itemsToStore(nb1, nb2);
                 //this->_htm->AddPoint(nb1, nb2);
-                nbObj++;
             }
         }
         file.close();
@@ -62,9 +60,9 @@ void HTMAsciiParser::PopulateHTM()
     }
 }
 
-unsigned int& HTMAsciiParser::getNbObj(void)
+unsigned int HTMAsciiParser::getNbObj(void)
 {
-    return this->nbObj;
+    return this->_cache.size();
 }
 
 void    HTMAsciiParser::UniformNumberGenerator(const double& raMin, const double& raMax, const double& decMin, const double& decMax)
@@ -75,8 +73,9 @@ void    HTMAsciiParser::UniformNumberGenerator(const double& raMin, const double
     std::uniform_real_distribution<double> unif2(decMin, decMax);
     auto random_ra = [&] () -> double {return unif1(gen);};
     auto random_dec = [&] () -> double {return unif2(gen);};
+    unsigned int nb_obj = this->_cache.size();
 
-    for (unsigned int i = 0; i < nbObj; ++i)
+    for (unsigned int i = 0; i < nb_obj; ++i)
     {
         const double ra = random_ra();
         const double dec = random_dec();
@@ -86,7 +85,6 @@ void    HTMAsciiParser::UniformNumberGenerator(const double& raMin, const double
 
 HTMAsciiParser::HTMAsciiParser(HTM *htm)
     : _htm{htm}
-    , nbObj(0)
 {
 }
 
