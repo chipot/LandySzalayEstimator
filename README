@@ -1,11 +1,3 @@
-## To run the projet, do :
+Do not read this code.
 
-# mkdir build
-# cd build/
-# cmake ..
-# make
-# cd core/
-# ./BLINK ../../catalogues/dr3_gal.0.4_z_0.6.radec.cat
-
-## An output is created in the log file.
-## Each point has his unique ID.
+It's not mine, I'm just here to fixup that mess when I have the time ...
