@@ -469,14 +469,12 @@ unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
         }
     }
 
-    for (auto it2 = constraint->_inside.begin(); it2 != constraint->_inside.end(); ++it2)
+    // sort of reduction like ?
+    for (auto &it : constraint->_inside)
     {
-        nbPairs += (*it2)->_nbChildObject;
+        nbPairs += it->_nbChildObject;
     }
-    for (auto it2 = constraint->_partial.begin(); it2 != constraint->_partial.end(); ++it2)
-    {
-        nbPairs += 1;
-    }
+    nbPairs += constraint->_partial.size();
 
     delete constraint;
     return nbPairs;
