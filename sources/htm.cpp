@@ -372,8 +372,7 @@ unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
             double y = rProjection * sin(pt->_ra);
             double z = cos(90 - abs(pt->_dec));
             Eigen::Vector3d p(x, y, z);
-
-            std::queue<trixel*> workingList;
+            std::queue<std::tuple<unsigned short int, unsigned short int, trixel*>> workingList;
 
             for (unsigned int i = 0; i < 4; ++i)
             {
@@ -401,7 +400,7 @@ unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
                 if (supInside == 3 && infInside == 0)
                     constraint->_inside.push_back(current_trixel);
                 if ((supInside == 3 && infInside > 0) || supInside > 0)
-                    workingList.push(this->_octahedron->_rootTrixels[i]);
+                    workingList.push(std::make_tuple(supInside, infInside, current_trixel));
                 else
                 {
                     Eigen::Vector3d tmpVec1 = current_trixel->_vertices[1] - current_trixel->_vertices[0];
@@ -425,23 +424,12 @@ unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
             }
             while (workingList.size() > 0)
             {
-                trixel* tmp = workingList.front();
-                workingList.pop();
                 unsigned short int infInside = 0;
                 unsigned short int supInside = 0;
-                if (p.dot(tmp->_vertices[0]) > infLimit)
-                    ++infInside;
-                if (p.dot(tmp->_vertices[2]) > infLimit)
-                    ++infInside;
-                if (p.dot(tmp->_vertices[1]) > infLimit)
-                    ++infInside;
+                trixel* tmp;
 
-                if (p.dot(tmp->_vertices[0]) > supLimit)
-                    ++supInside;
-                if (p.dot(tmp->_vertices[2]) > supLimit)
-                    ++supInside;
-                if (p.dot(tmp->_vertices[1]) > supLimit)
-                    ++supInside;
+                std::tie(supInside, infInside, tmp) = workingList.front();
+                workingList.pop();
 
                 if (supInside == 3 && infInside == 0)
                     constraint->_inside.push_back(tmp);
@@ -452,7 +440,7 @@ unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
                     {
                         for (unsigned int i = 0; i < 4; ++i)
                             if (tmp->_children[i] != NULL)
-                                workingList.push(tmp->_children[i]);
+                                workingList.push(std::make_tuple(supInside, infInside, tmp->_children[i]));
                     }
                     else
                         constraint->_partial.push_back(tmp);
