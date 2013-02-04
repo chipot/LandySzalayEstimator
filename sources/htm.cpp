@@ -379,30 +379,33 @@ unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
             {
                 unsigned short int infInside = 0;
                 unsigned short int supInside = 0;
-                if (this->_octahedron->_rootTrixels[i] != NULL)
-                {
-                    if (p.dot(this->_octahedron->_rootTrixels[i]->_vertices[0]) > infLimit)
-                        ++infInside;
-                    if (p.dot(this->_octahedron->_rootTrixels[i]->_vertices[1]) > infLimit)
-                        ++infInside;
-                    if (p.dot(this->_octahedron->_rootTrixels[i]->_vertices[2]) > infLimit)
-                        infInside++;
+                trixel *current_trixel = this->_octahedron->_rootTrixels[i];
 
-                    if (p.dot(this->_octahedron->_rootTrixels[i]->_vertices[0]) > supLimit)
+                if (current_trixel != NULL)
+                {
+
+                    if (p.dot(current_trixel->_vertices[0]) > infLimit)
+                        ++infInside;
+                    if (p.dot(current_trixel->_vertices[1]) > infLimit)
+                        ++infInside;
+                    if (p.dot(current_trixel->_vertices[2]) > infLimit)
+                        ++infInside;
+
+                    if (p.dot(current_trixel->_vertices[0]) > supLimit)
                         ++supInside;
-                    if (p.dot(this->_octahedron->_rootTrixels[i]->_vertices[1]) > supLimit)
+                    if (p.dot(current_trixel->_vertices[1]) > supLimit)
                         ++supInside;
-                    if (p.dot(this->_octahedron->_rootTrixels[i]->_vertices[2]) > supLimit)
-                        supInside++;
+                    if (p.dot(current_trixel->_vertices[2]) > supLimit)
+                        ++supInside;
                 }
                 if (supInside == 3 && infInside == 0)
-                    constraint->_inside.push_back(this->_octahedron->_rootTrixels[i]);
+                    constraint->_inside.push_back(current_trixel);
                 if ((supInside == 3 && infInside > 0) || supInside > 0)
                     workingList.push(this->_octahedron->_rootTrixels[i]);
                 else
                 {
-                    Eigen::Vector3d tmpVec1 = _octahedron->_rootTrixels[i]->_vertices[1] - _octahedron->_rootTrixels[i]->_vertices[0];
-                    Eigen::Vector3d tmpVec2 = _octahedron->_rootTrixels[i]->_vertices[2] - _octahedron->_rootTrixels[i]->_vertices[1];
+                    Eigen::Vector3d tmpVec1 = current_trixel->_vertices[1] - current_trixel->_vertices[0];
+                    Eigen::Vector3d tmpVec2 = current_trixel->_vertices[2] - current_trixel->_vertices[1];
                     Eigen::Vector3d tmpVec3 = tmpVec1.cross(tmpVec2);
                     Eigen::Vector3d trixelBoundary = tmpVec3 / tmpVec3.norm();
 
@@ -411,11 +414,11 @@ unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
                     double phi2 = acos(p.dot(Eigen::Vector3d(1,0,0)) / p.norm());
                     if (theta < phi1 + phi2)
                     {
-                        if (!(_octahedron->_rootTrixels[i]->_vertices[0].cross(_octahedron->_rootTrixels[i]->_vertices[1]).dot(p) < 0 &&
-                              _octahedron->_rootTrixels[i]->_vertices[1].cross(_octahedron->_rootTrixels[i]->_vertices[2]).dot(p) < 0 &&
-                              _octahedron->_rootTrixels[i]->_vertices[2].cross(_octahedron->_rootTrixels[i]->_vertices[0]).dot(p)))
+                        if (!(current_trixel->_vertices[0].cross(current_trixel->_vertices[1]).dot(p) < 0 &&
+                              current_trixel->_vertices[1].cross(current_trixel->_vertices[2]).dot(p) < 0 &&
+                              current_trixel->_vertices[2].cross(current_trixel->_vertices[0]).dot(p)))
                         {
-                            constraint->_partial.push_back(_octahedron->_rootTrixels[i]);
+                            constraint->_partial.push_back(current_trixel);
                         }
                     }		  
                 }
