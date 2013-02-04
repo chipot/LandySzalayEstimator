@@ -352,14 +352,19 @@ unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
 {
     unsigned int nbPairs = 0;
 
+    // Select the two border of the donut
     double infLimit = radius - delta;
-    if (infLimit < 0) infLimit = 0;
     double supLimit = radius + delta;
+
+    if (infLimit < 0)
+        infLimit = 0;
+
     Constraint *constraint = new Constraint;
 
     for (auto &it: this->_points)
     {
         PointInfo* pt = it.second;
+
         if (IsCorrectRA(pt->_ra) && IsCorrectDEC(pt->_dec))
         {
             double rProjection = sin(90 - abs(pt->_dec));
@@ -368,8 +373,7 @@ unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
             double z = cos(90 - abs(pt->_dec));
             Eigen::Vector3d p(x, y, z);
 
-            static std::queue<trixel*> workingList;
-            std::queue<trixel*>().swap(workingList);
+            std::queue<trixel*> workingList;
 
             for (unsigned int i = 0; i < 4; ++i)
             {
