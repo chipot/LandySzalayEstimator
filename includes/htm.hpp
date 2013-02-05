@@ -86,7 +86,7 @@ class HTM
   void constraintNotInside(trixel* trixel, const Eigen::Vector3d& p, Constraint*);
 
   ///
-  bool SelectRootTrixel(PointInfo* pt);
+  void SelectRootTrixel(PointInfo* pt);
 
   /// 
   inline std::pair<double, double> CalcCoordPoint(std::pair<double, double>& a, std::pair<double, double>& b);

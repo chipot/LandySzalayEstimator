@@ -33,10 +33,8 @@ void HTM::AddPoint(const double& ra, const double& dec)
     PointInfo* info = new PointInfo;
     info->_ra = ra;
     info->_dec = dec;
-    if (this->SelectRootTrixel(info))
-        this->_pointList.push(info);
-    else
-        delete info;
+    this->SelectRootTrixel(info);
+    this->_pointList.push(info);
 }
 
 // CreateHTM
@@ -273,7 +271,7 @@ inline std::pair<double, double>       HTM::CalcCoordPoint(std::pair<double, dou
     return result;
 }
 
-bool HTM::SelectRootTrixel(PointInfo* pt)
+void HTM::SelectRootTrixel(PointInfo* pt)
 {
     for (int i = 0; i < 8; ++i)
     {
@@ -289,10 +287,10 @@ bool HTM::SelectRootTrixel(PointInfo* pt)
             v[2].cross(v[0]).dot(p) > 0)
         {
             pt->_current = this->_octahedron->_rootTrixels[i];
-            return true;
+            return ;
         }
     }
-    return false;
+    assert("What the fuck ? This shall never fail");
 }
 
 inline double				HTM::Scal(std::pair<double, double>& v1, std::pair<double, double>& v2) const

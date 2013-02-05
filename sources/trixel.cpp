@@ -234,7 +234,7 @@ unsigned short int GetIndex(trixel* trixel, Eigen::Vector3d& p)
 
         if (index == max<unsigned short>())
             // Shit is incorrect, but why, what, how ? God only knows
-            std::cout << "Incorrect : " << trixel->_HTMId << std::endl
+            llog::warn["GetIndex"]  << "Incorrect : " << trixel->_HTMId << std::endl
                 << "--- v1" << std::endl <<  trixel->_vertices[0] << std::endl
                 << "--- v2" << std::endl << trixel->_vertices[1] << std::endl
                 << "--- v3" << std::endl << trixel->_vertices[2] << std::endl
