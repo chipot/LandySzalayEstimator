@@ -62,18 +62,12 @@ std::string HTM::AssignPoint(PointInfo* pt)
             return std::string("error");
         }
 
-        if (pt->_current->_children[index] != NULL)
-        {
-            pt->_current = pt->_current->_children[index];
-
-            this->_pointList.push(pt);
-        }
-        else
+        if (pt->_current->_children[index] == NULL)
         {
             pt->_current->_children[index] = CreateTrixelChild(pt->_current, index);
-            pt->_current = pt->_current->_children[index];
-            this->_pointList.push(pt);
         }
+        pt->_current = pt->_current->_children[index];
+	this->_pointList.push(pt);
     }
     else if (pt->_current->_nbChildObject == 1)
     {
