@@ -26,9 +26,10 @@ class HTM
 
   std::ofstream stream;				//< Output stream to write HTM description
 
-  std::priority_queue<double, std::deque<double>, std::greater<double>> _raQueue; //< Odered Stack for ra values
-
-  std::priority_queue<double, std::deque<double>, std::greater<double>> _decQueue; //< Ordered Stack for dec values
+  double _raMax;
+  double _raMin;
+  double _decMax;
+  double _decMin;
 
  public:
   /// Add a new point to the working list

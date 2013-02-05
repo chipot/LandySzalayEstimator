@@ -8,6 +8,7 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+#include <cfloat>
 
 // EIGEN INCLUDES
 #include <Eigen/Dense>
@@ -110,40 +111,34 @@ std::string HTM::AssignPoint(PointInfo* pt)
 
 double HTM::getMinRa(void)
 {
-    return this->_raQueue.top();
+    return this->_raMin;
 }
 
 double HTM::getMinDec(void)
 {
-    return this->_decQueue.top();
+    return this->_decMin;
 }
 
 double HTM::getMaxRa(void)
 {
-    double raMax;
-    while (!this->_raQueue.empty())
-    {
-        raMax = this->_raQueue.top();
-        this->_raQueue.pop();
-    }
-    return raMax;
+    return this->_raMax;
 }
 
 double HTM::getMaxDec(void)
 {
-    double decMax;
-    while (!this->_decQueue.empty())
-    {
-        decMax = this->_decQueue.top();
-        this->_decQueue.pop();
-    }
-    return decMax;
+    return this->_decMax;
 }
 
 void HTM::itemsToStore(const double& ra, const double& dec)
 {
-    this->_raQueue.push(ra);
-    this->_decQueue.push(dec);
+  if (ra > _raMax)
+    _raMax = ra;
+  if (ra < _raMin)
+    _raMin = ra;
+  if (dec > _decMax)
+    _decMax = dec;
+  if (dec < _decMin)
+    _decMin = dec;
 }
 
 
@@ -643,6 +638,7 @@ void	HTM::DeleteOctahedron(void)
 
 /// Create the HTM
 HTM::HTM()
+  : _raMax{DBL_MIN}, _raMin{DBL_MAX}, _decMax{DBL_MIN}, _decMin{DBL_MAX}
 {
     llog::notice["HTM"] <<  "HTM core created" << std::endl;
 }
