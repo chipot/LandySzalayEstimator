@@ -146,12 +146,34 @@ void HTM::itemsToStore(const double& ra, const double& dec)
     this->_decQueue.push(dec);
 }
 
+
+  void HTM::constraintNotInside(trixel* trixel, const Eigen::Vector3d& p, Constraint* constraint)
+{
+        Eigen::Vector3d tmpVec1 = trixel->_vertices[1] - trixel->_vertices[0];
+        Eigen::Vector3d tmpVec2 = trixel->_vertices[2] - trixel->_vertices[1];
+        Eigen::Vector3d tmpVec3 = tmpVec1.cross(tmpVec2);
+        Eigen::Vector3d trixelBoundary = tmpVec3 / tmpVec3.norm();
+        double theta = acos(trixelBoundary.dot(p) / (trixelBoundary.norm() * p.norm()));
+        double phi1 = acos(trixelBoundary.dot(Eigen::Vector3d(1,0,0)) / (trixelBoundary.norm()));
+        double phi2 = acos(p.dot(Eigen::Vector3d(1,0,0)) / p.norm());
+
+        if (theta < phi1 + phi2)
+        {
+	    if (!(trixel->_vertices[0].cross(trixel->_vertices[1]).dot(p) < 0 &&
+                  trixel->_vertices[1].cross(trixel->_vertices[2]).dot(p) < 0 &&
+                  trixel->_vertices[2].cross(trixel->_vertices[0]).dot(p)))
+            {
+                constraint->_partial.push_back(trixel);
+            }
+        }
+}
+
 Constraint* HTM::SetConstraint(PointInfo* pt, double& radius)
 {
     Constraint* constraint = NULL;
     if (pt != NULL)
     {
-
+      //pareil que twopointcorrelation
         if (IsCorrectRA(pt->_ra) && IsCorrectDEC(pt->_dec))
         {
             double rProjection = sin(90 - abs(pt->_dec));
@@ -159,6 +181,8 @@ Constraint* HTM::SetConstraint(PointInfo* pt, double& radius)
             double y = rProjection * sin(pt->_ra);
             double z = cos(90 - abs(pt->_dec));
             Eigen::Vector3d p(x, y, z);
+	    //fin pareil
+
             constraint = new Constraint;
             static std::queue<trixel*> workingList;
             std::queue<trixel*>().swap(workingList);
@@ -181,23 +205,7 @@ Constraint* HTM::SetConstraint(PointInfo* pt, double& radius)
                     workingList.push(this->_octahedron->_rootTrixels[i]);
                 else
                 {
-                    Eigen::Vector3d tmpVec1 = _octahedron->_rootTrixels[i]->_vertices[1] - _octahedron->_rootTrixels[i]->_vertices[0];
-                    Eigen::Vector3d tmpVec2 = _octahedron->_rootTrixels[i]->_vertices[2] - _octahedron->_rootTrixels[i]->_vertices[1];
-                    Eigen::Vector3d tmpVec3 = tmpVec1.cross(tmpVec2);
-                    Eigen::Vector3d trixelBoundary = tmpVec3 / tmpVec3.norm();
-
-                    double theta = acos(trixelBoundary.dot(p) / (trixelBoundary.norm() * p.norm()));
-                    double phi1 = acos(trixelBoundary.dot(Eigen::Vector3d(1,0,0)) / (trixelBoundary.norm()));
-                    double phi2 = acos(p.dot(Eigen::Vector3d(1,0,0)) / p.norm());
-                    if (theta < phi1 + phi2)
-                    {
-                        if (!(_octahedron->_rootTrixels[i]->_vertices[0].cross(_octahedron->_rootTrixels[i]->_vertices[1]).dot(p) < 0 &&
-                              _octahedron->_rootTrixels[i]->_vertices[1].cross(_octahedron->_rootTrixels[i]->_vertices[2]).dot(p) < 0 &&
-                              _octahedron->_rootTrixels[i]->_vertices[2].cross(_octahedron->_rootTrixels[i]->_vertices[0]).dot(p)))
-                        {
-                            constraint->_partial.push_back(_octahedron->_rootTrixels[i]);
-                        }
-                    }
+		  constraintNotInside(_octahedron->_rootTrixels[i], p, constraint);
                 }      
             }
             while (workingList.size() > 0)
@@ -397,23 +405,7 @@ unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
                     workingList.push(std::make_tuple(supInside, infInside, current_trixel));
                 else
                 {
-                    Eigen::Vector3d tmpVec1 = current_trixel->_vertices[1] - current_trixel->_vertices[0];
-                    Eigen::Vector3d tmpVec2 = current_trixel->_vertices[2] - current_trixel->_vertices[1];
-                    Eigen::Vector3d tmpVec3 = tmpVec1.cross(tmpVec2);
-                    Eigen::Vector3d trixelBoundary = tmpVec3 / tmpVec3.norm();
-
-                    double theta = acos(trixelBoundary.dot(p) / (trixelBoundary.norm() * p.norm()));
-                    double phi1 = acos(trixelBoundary.dot(Eigen::Vector3d(1,0,0)) / (trixelBoundary.norm()));
-                    double phi2 = acos(p.dot(Eigen::Vector3d(1,0,0)) / p.norm());
-                    if (theta < phi1 + phi2)
-                    {
-                        if (!(current_trixel->_vertices[0].cross(current_trixel->_vertices[1]).dot(p) < 0 &&
-                              current_trixel->_vertices[1].cross(current_trixel->_vertices[2]).dot(p) < 0 &&
-                              current_trixel->_vertices[2].cross(current_trixel->_vertices[0]).dot(p)))
-                        {
-                            constraint->_partial.push_back(current_trixel);
-                        }
-                    }		  
+		  constraintNotInside(current_trixel, p, constraint);
                 }
             }
             while (workingList.size() > 0)

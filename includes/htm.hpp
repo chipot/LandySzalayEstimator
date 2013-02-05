@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <queue>
+#include <Eigen/Dense>
 
 namespace htm {
 
@@ -78,6 +79,10 @@ class HTM
   Constraint* SetConstraint(PointInfo* pt, double& radius);
   /// Create a new trixel structure from its parent and the zone index
   // void CreateTrixelChildren(trixel *parent, unsigned int& index);
+
+
+  ///
+  void constraintNotInside(trixel* trixel, const Eigen::Vector3d& p, Constraint*);
 
   ///
   bool SelectRootTrixel(PointInfo* pt);
