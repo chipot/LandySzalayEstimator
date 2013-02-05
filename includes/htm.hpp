@@ -87,7 +87,6 @@ class HTM
 
  private:
 
-  Constraint* SetConstraint(PointInfo* pt, double& radius);
   /// Create a new trixel structure from its parent and the zone index
   // void CreateTrixelChildren(trixel *parent, unsigned int& index);
 
