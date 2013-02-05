@@ -32,8 +32,6 @@ class HTM
 
   std::unordered_set<PointInfo*, PointInfoHash, PointInfoCmp>	_points;	//< map that reference objects by their HTMId
 
-  std::queue<PointInfo*> _pointList;		//< List of points you are working with
-
   std::ofstream stream;				//< Output stream to write HTM description
 
   double _raMax;

@@ -43,19 +43,12 @@ void HTM::AddPoint(const double& ra, const double& dec)
     info->_ra = ra;
     info->_dec = dec;
     this->SelectRootTrixel(info);
-    this->_pointList.push(info);
+    this->AssignPoint(info);
 }
 
 // CreateHTM
 bool HTM::CreateHTM()
 {
-    PointInfo* pt;
-    while (!this->_pointList.empty())
-    {
-        pt = _pointList.front();
-        this->_pointList.pop();
-        this->AssignPoint(pt);
-    }
     return true;
 }
 
@@ -75,7 +68,7 @@ std::string HTM::AssignPoint(PointInfo* pt)
             pt->_current->_children[index] = CreateTrixelChild(pt->_current, index);
         }
         pt->_current = pt->_current->_children[index];
-	this->_pointList.push(pt);
+        AssignPoint(pt);
     }
     else if (pt->_current->_nbChildObject == 1)
     {
@@ -105,9 +98,9 @@ std::string HTM::AssignPoint(PointInfo* pt)
             }
         }
         old->_current = pt->_current->_children[indexOld];
-        this->_pointList.push(pt);
-        this->_pointList.push(old);
         pt->_current = pt->_current->_children[indexCurrent];
+        AssignPoint(pt);
+        AssignPoint(old);
     }
     else if (pt->_current->_nbChildObject == 0)
     {
