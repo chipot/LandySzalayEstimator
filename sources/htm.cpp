@@ -638,12 +638,12 @@ void	HTM::DeleteOctahedron(void)
 HTM::HTM()
   : _raMax{DBL_MIN}, _raMin{DBL_MAX}, _decMax{DBL_MIN}, _decMin{DBL_MAX}
 {
-    llog::notice["HTM"] <<  "HTM core created" << std::endl;
+    llog::debug["HTM"] <<  "HTM core created" << std::endl;
 }
 
 HTM::~HTM()
 {
-    llog::notice["HTM"] <<  "HTM core deleted" << std::endl;
+    llog::debug["HTM"] <<  "HTM core deleted" << std::endl;
 }
 
 }

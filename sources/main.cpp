@@ -2,6 +2,7 @@
 #include <limits>
 #include <unistd.h>
 #include <sstream>
+#include <iomanip>
 
 #include "htm.hpp"
 #include "htmasciiparser.hpp"
@@ -11,7 +12,7 @@ static unsigned int loop = 100;
 
 int main(int ac, char **av)
 {
-    llog::notice["main"] << "BLINK::HTM test main" << std::endl;
+    llog::debug["main"] << "BLINK::HTM test main" << std::endl;
     if (ac == 4)
     {
         std::string file(av[1]);
@@ -27,7 +28,7 @@ int main(int ac, char **av)
         parser.PopulateHTM();
         htm->CreateHTM();
 
-        llog::notice["main"] << "HTM Created for Normal Catalog" << std::endl;;
+        llog::debug["main"] << "HTM Created for Normal Catalog" << std::endl;;
         unsigned int nn = htm->TwoPointsCorrelation(radius, delta);
         llog::notice["main"] << "Two Point Correlation have been computed for the Normal Catalog [" << nn << "] pairs" << std::endl; 
 
@@ -41,7 +42,7 @@ int main(int ac, char **av)
         unsigned int nr = 0;
         for (unsigned int i = 0; i != loop; ++i)
         {
-            llog::notice["main"] << "Computing loop " << i + 1 << " on " << loop << std::endl;
+            llog::debug["main"] << "Computing loop " << i + 1 << " on " << loop << std::endl;
             htm->DeleteOctahedron(); // Oh my God
             htm->CreateOctahedron(); // So that's why...
             // This is stupid: This function add points into the HTM !!!!
@@ -50,16 +51,18 @@ int main(int ac, char **av)
 
             unsigned int currentRR = htm->TwoPointsCorrelation(radius, delta);
             rr += currentRR;
-            llog::notice["main"] << "Two Point Correlation have been computed for the Random Catalog [" << currentRR << "] mean [" << (rr / (i + 1)) << "]" << std::endl;
+            llog::debug["main"] << "Two Point Correlation have been computed for the Random Catalog [" << currentRR << "] mean [" << (rr / (i + 1)) << "]" << std::endl;
 
             parser.PopulateHTM();
             htm->CreateHTM();
             unsigned int currentNR = htm->TwoPointsCorrelation(radius, delta);
             nr += currentNR;
-            llog::notice["main"] << "Two Point Correlation have been computed for the Hybrid Catalog [" << currentNR << "] mean [" << (nr / (i + 1)) << "]" << std::endl;
+            llog::debug["main"] << "Two Point Correlation have been computed for the Hybrid Catalog [" << currentNR << "] mean [" << (nr / (i + 1)) << "]" << std::endl;
+            std::cout << "\r" << i;
         }
+        std::cout << std::endl;
 
-        llog::notice["main"] << "...Done !" << std::endl;
+        llog::debug["main"] << "\n...Done !" << std::endl;
 
         // rr and nr are modified in the loop.. nn is defined by the Two P. C.
         // at the beginning
@@ -75,13 +78,13 @@ int main(int ac, char **av)
             estimator = (nn_d - (2 * nr_d) + rr_d) / rr_d;
         }
 
-        llog::notice["main"] << "Landy Szalay Estimator for current catalog returns : " << estimator << std::endl;
+        llog::notice["main"] << "Landy Szalay Estimator for current catalog returns : "<< std::scientific << std::setprecision(15) << estimator << std::endl;
 
         htm->Delete();
     }
     else
         llog::fatal["main"] << "Usage : ./LandySzalayEstimator <catalog_file> <radius> <delta>" << std::endl;
 
-    llog::notice["main"] << "Exiting..." << std::endl;
+    llog::debug["main"] << "Exiting..." << std::endl;
     return 0;
 }

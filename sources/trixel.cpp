@@ -36,7 +36,7 @@ trixel** CreateTrixelChildren(trixel *parent)
         {
             if (parent->_children[i] != NULL)
             {
-                llog::notice["ICoDF::CreateTrixelChildren"]
+                llog::debug["ICoDF::CreateTrixelChildren"]
                     <<  "Trixel already have child(ren)" << std::endl;
             }
         }
@@ -91,7 +91,7 @@ trixel* CreateTrixelChild(trixel* parent, unsigned short int& index)
 {
     if (parent->_children == NULL)
     {
-        llog::notice["ICoDF::CreateTrixelChild"]
+        llog::debug["ICoDF::CreateTrixelChild"]
             <<  "Trixel has no container for children" << std::endl;
         CreateTrixelChildren(parent);
     }
@@ -128,7 +128,7 @@ trixel* CreateTrixelChild(trixel* parent, unsigned short int& index)
                 parent->_children[index]->_vertices[2] = midPoints[2];
                 break;
             default:
-                llog::fatal["ICoDF::CreateTrixelChild"]
+                llog::warn["ICoDF::CreateTrixelChild"]
                     << "Given <index> is out of bound" << std::endl;
                 delete [] midPoints; 
                 return NULL;
@@ -137,7 +137,7 @@ trixel* CreateTrixelChild(trixel* parent, unsigned short int& index)
     }
     else
     {
-        llog::notice["ICoDF::CreateTrixelChild"]
+        llog::warn["ICoDF::CreateTrixelChild"]
             << "SubTrixel [" << parent->_HTMId << index << "] already exists"
             << std::endl;
     }
@@ -196,7 +196,7 @@ unsigned short int GetIndex(trixel* trixel, double& ra, double& dec)
     }
     else
     {
-        llog::notice["HTM"]
+        llog::warn["HTM"]
             << "Given <ra> [" << ra << "] or <dec> [" << dec << "] is out of bounds"
             << std::endl;
     }
