@@ -72,7 +72,7 @@ int main(int ac, char **av)
             double nr_d = nr;
             double rr_d = rr;
 
-            estimator = (nn_d - (2 * nr_d) - rr_d) / rr_d;
+            estimator = (nn_d - (2 * nr_d) + rr_d) / rr_d;
         }
 
         llog::notice["main"] << "Landy Szalay Estimator for current catalog returns : " << estimator << std::endl;
