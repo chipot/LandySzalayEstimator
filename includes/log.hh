@@ -12,6 +12,7 @@ namespace llog {
 
 enum class level : int
 {
+    DEBUG,
     NOTICE,
     WARNING,
     FATAL,
@@ -27,6 +28,17 @@ struct level_base
 
         strftime(date, sizeof(date), "%c", ts);
         return std::string(date);
+    }
+};
+
+struct level_debug : private level_base
+{
+    static level const L = level::NOTICE;
+    static std::string const name() {
+        return "debug";
+    }
+    static std::string const prefix() {
+        return "(&)" + now() + " : ";
     }
 };
 
@@ -136,6 +148,7 @@ class notifier
 extern notifier<level_notice> notice;
 extern notifier<level_warning> warn;
 extern notifier<level_fatal> fatal;
+extern notifier<level_debug> debug;
 
 } /* log */
 
