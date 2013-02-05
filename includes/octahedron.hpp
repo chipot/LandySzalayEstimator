@@ -9,7 +9,11 @@ struct trixel;
 struct Octahedron
 {
     std::string _name;
-    trixel** _rootTrixels; // [0] = S0, [4] = N0
+    trixel** _rootTrixels; 
+    // [0] = S0, [4] = N0
+    // [1] = S1, [5] = N1
+    // [2] = S2, [6] = N2
+    // [3] = S3, [7] = N3
 };
 
 }
