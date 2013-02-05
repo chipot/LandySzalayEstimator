@@ -25,6 +25,15 @@
 
 namespace htm {
 
+size_t PointInfoHash::operator()(PointInfo const * pt) const noexcept
+{
+    return std::hash<std::string>()(pt->_current->_HTMId);
+}
+bool PointInfoCmp::operator()(PointInfo const *lhs, PointInfo const *rhs) const noexcept
+{
+    return lhs->_current->_HTMId == rhs->_current->_HTMId;
+}
+
 HTM* HTM::_singleton = NULL; // Initialize the singleton to NULL.
 
 // ADD POINT
@@ -89,8 +98,11 @@ std::string HTM::AssignPoint(PointInfo* pt)
             CreateTrixelChild(pt->_current, indexOld);
             if (indexOld != indexCurrent)
                 CreateTrixelChild(pt->_current, indexCurrent);
-            auto it = this->_points.find(pt->_current->_HTMId);
-            this->_points.erase(it);
+            auto it = this->_points.find(pt);
+            if (it != end(this->_points))
+            {
+                this->_points.erase(it);
+            }
         }
         old->_current = pt->_current->_children[indexOld];
         this->_pointList.push(pt);
@@ -100,7 +112,7 @@ std::string HTM::AssignPoint(PointInfo* pt)
     else if (pt->_current->_nbChildObject == 0)
     {
         pt->_current->_info = pt;
-        this->_points[pt->_current->_HTMId] = pt;
+        this->_points.insert(pt);
         pt->_current->_nbChildObject = 1;
         return pt->_current->_HTMId;
     }
@@ -356,9 +368,8 @@ unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
 
     Constraint *constraint = new Constraint;
 
-    for (auto &it: this->_points)
+    for (auto &pt: this->_points)
     {
-        PointInfo* pt = it.second;
 
         if (IsCorrectRA(pt->_ra) && IsCorrectDEC(pt->_dec))
         {
@@ -551,6 +562,7 @@ void	HTM::CreateOctahedron(void)
 
 void	HTM::Display(trixel* current, std::ofstream& fstream)
 {
+#if 0
     if (current != NULL)
     {
         if (current->_children != NULL)
@@ -596,6 +608,7 @@ void	HTM::Display(trixel* current, std::ofstream& fstream)
             }
         }
     }
+#endif
 }
 
 void	HTM::FreeAllTrixels(trixel* current)
@@ -626,8 +639,10 @@ void	HTM::DeleteOctahedron(void)
     //fstream.close();
     for (auto i = 0; i < 8; ++i)
         this->FreeAllTrixels(this->_octahedron->_rootTrixels[i]);
-    for (auto it = this->_points.begin(); it != this->_points.end(); ++it)
-        delete it->second;
+    for (auto &p : this->_points)
+    {
+        delete p;
+    }
     for (auto i = 0; i < 8; ++i)
         delete this->_octahedron->_rootTrixels[i];
     this->_points.clear();

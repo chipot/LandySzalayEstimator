@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <queue>
 #include <Eigen/Dense>
 
@@ -15,12 +16,21 @@ struct trixel;
 
 class HTMAsciiParser;
 
+struct PointInfoHash
+{
+    size_t operator()(PointInfo const * pt) const noexcept;
+};
+struct PointInfoCmp
+{
+    bool operator()(PointInfo const *lhs, PointInfo const *rhs) const noexcept;
+};
+
 class HTM
 {
  private:
   Octahedron* _octahedron;				//< base HTM Octahedron
 
-  std::unordered_map<std::string, PointInfo*>	_points;	//< map that reference objects by their HTMId
+  std::unordered_set<PointInfo*, PointInfoHash, PointInfoCmp>	_points;	//< map that reference objects by their HTMId
 
   std::queue<PointInfo*> _pointList;		//< List of points you are working with
 
