@@ -34,11 +34,6 @@ class HTM
 
   std::ofstream stream;				//< Output stream to write HTM description
 
-  double _raMax;
-  double _raMin;
-  double _decMax;
-  double _decMin;
-
  public:
   /// Add a new point to the working list
   void AddPoint(const double& ra, const double& dec);
@@ -58,23 +53,8 @@ class HTM
   /// Delete the base Octahedron
   void DeleteOctahedron(void);
 
-  /// Push ra and dec to their ordered stacks
-  void itemsToStore(const double& ra, const double& dec);
-
   /// Get number of pairs a the radius -+ delta from the given object
   unsigned int TwoPointsCorrelation(double &radius, double &delta);
-
-  /// Get the minimal ra value from the created HTM
-  double getMinRa(void);
-
-  /// Get the minimal dec value from the created HTM
-  double getMinDec(void);
-
-  /// Get the maximal ra value from the created HTM
-  double getMaxRa(void);
-
-  /// Get the maximal ra value from the created HTM
-  double getMaxDec(void);
 
  public:
   /// Create the singleton instance if applicable and/or return a pointer to it.

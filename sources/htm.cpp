@@ -8,7 +8,6 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
-#include <cfloat>
 
 // EIGEN INCLUDES
 #include <Eigen/Dense>
@@ -110,38 +109,6 @@ std::string HTM::AssignPoint(PointInfo* pt)
         return pt->_current->_HTMId;
     }
     return pt->_current->_HTMId;
-}
-
-double HTM::getMinRa(void)
-{
-    return this->_raMin;
-}
-
-double HTM::getMinDec(void)
-{
-    return this->_decMin;
-}
-
-double HTM::getMaxRa(void)
-{
-    return this->_raMax;
-}
-
-double HTM::getMaxDec(void)
-{
-    return this->_decMax;
-}
-
-void HTM::itemsToStore(const double& ra, const double& dec)
-{
-  if (ra > _raMax)
-    _raMax = ra;
-  if (ra < _raMin)
-    _raMin = ra;
-  if (dec > _decMax)
-    _decMax = dec;
-  if (dec < _decMin)
-    _decMin = dec;
 }
 
 
@@ -543,7 +510,6 @@ void	HTM::DeleteOctahedron(void)
 
 /// Create the HTM
 HTM::HTM()
-  : _raMax{DBL_MIN}, _raMin{DBL_MAX}, _decMax{DBL_MIN}, _decMin{DBL_MAX}
 {
     llog::debug["HTM"] <<  "HTM core created" << std::endl;
 }

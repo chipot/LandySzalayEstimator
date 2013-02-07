@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <random>
 #include <chrono>
+#include <tuple>
+#include <cfloat>
 
 #include "htm.hpp"
 #include "htmasciiparser.hpp"
@@ -38,6 +40,32 @@ uniform_number_generator(unsigned int nb_obj,
     return move(points);
 }
 
+std::tuple<double, double, double, double>
+find_minmax(std::vector<std::pair<double, double>> &points)
+{
+    double min_ra = DBL_MAX;
+    double max_ra = DBL_MIN;
+    double min_dec = DBL_MAX;
+    double max_dec = DBL_MIN;
+
+    for (auto const &p : points)
+    {
+        double ra;
+        double dec;
+
+        std::tie(ra, dec) = p;
+        if (ra > max_ra)
+            max_ra = ra;
+        if (ra < min_ra)
+            min_ra = ra;
+        if (dec > max_dec)
+            max_dec = dec;
+        if (dec < min_dec)
+            min_dec = dec;
+    }
+    return std::make_tuple(min_ra, max_ra, min_dec, max_dec);
+}
+
 int main(int ac, char **av)
 {
     llog::debug["main"] << "BLINK::HTM test main" << std::endl;
@@ -58,7 +86,6 @@ int main(int ac, char **av)
         // add points into the HTM
         for (auto const &p : points)
         {
-            htm->itemsToStore(p.first, p.second);
             htm->AddPoint(p.first, p.second);
         }
 
@@ -66,28 +93,29 @@ int main(int ac, char **av)
         unsigned int nn = htm->TwoPointsCorrelation(radius, delta);
         llog::notice["main"] << "Two Point Correlation have been computed for the Normal Catalog [" << nn << "] pairs" << std::endl; 
 
-        double raMin = htm->getMinRa();
-        double raMax = htm->getMaxRa();
-        double decMin = htm->getMinDec();
-        double decMax = htm->getMaxDec();
-        llog::notice["main"] << "Computing Mean values for Random and Hybrid Catalog on " << loop << " loops using " << points.size() << " random objects..." << std::endl;
+        llog::notice["main"]
+            << "Computing Mean values for Random and Hybrid Catalog on "
+            << loop << " loops"
+            << " using " << points.size() << " random objects..."
+            << std::endl;
 
+        double raMin;
+        double raMax;
+        double decMin;
+        double decMax;
         unsigned int rr = 0;
         unsigned int nr = 0;
+        std::tie(raMin, raMax, decMin, decMax) = find_minmax(points);
         for (unsigned int i = 0; i != loop; ++i)
         {
             llog::debug["main"] << "Computing loop " << i + 1 << " on " << loop << std::endl;
             htm->DeleteOctahedron(); // Oh my God
             htm->CreateOctahedron(); // So that's why...
+
+            // Add random points into the HTM
             auto random_points = uniform_number_generator(points.size(), raMin, raMax, decMin, decMax);
             for (auto const &p : random_points)
-            {
-                double ra;
-                double dec;
-
-                std::tie(ra, dec) = p;
-                htm->AddPoint(ra, dec);
-            }
+                htm->AddPoint(p.first, p.second);
 
             unsigned int currentRR = htm->TwoPointsCorrelation(radius, delta);
             rr += currentRR;
@@ -96,19 +124,17 @@ int main(int ac, char **av)
                 << "[" << currentRR << "]" << " mean "
                 << "[" << (rr / (i + 1)) << "]" << std::endl;
 
-            // Add points into the HTM again
+            // Add points from the file into the HTM
             for (auto const &p : points)
-            {
-                htm->itemsToStore(p.first, p.second);
                 htm->AddPoint(p.first, p.second);
-            }
-            htm->CreateHTM();
+
             unsigned int currentNR = htm->TwoPointsCorrelation(radius, delta);
             nr += currentNR;
             llog::debug["main"]
                 << "Two Point Correlation for the Hybrid Catalog "
                 << "[" << currentNR << "]" << " mean "
                 << "[" << (nr / (i + 1)) << "]" << std::endl;
+
             std::cout << "\r" << i;
         }
         std::cout << std::endl;
