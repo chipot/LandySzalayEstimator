@@ -3,12 +3,40 @@
 #include <unistd.h>
 #include <sstream>
 #include <iomanip>
+#include <random>
+#include <chrono>
 
 #include "htm.hpp"
 #include "htmasciiparser.hpp"
 #include "log.hh"
 
 static unsigned int loop = 100;
+
+std::vector<std::pair<double, double>>
+uniform_number_generator(unsigned int nb_obj,
+                         const double& raMin,
+                         const double& raMax,
+                         const double& decMin,
+                         const double& decMax)
+{
+    static unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count() * getpid();
+    static std::mt19937_64 gen(seed1);
+
+    std::uniform_real_distribution<double> unif1(raMin, raMax);
+    std::uniform_real_distribution<double> unif2(decMin, decMax);
+    auto random_ra = [&] () -> double {return unif1(gen);};
+    auto random_dec = [&] () -> double {return unif2(gen);};
+
+    std::vector<std::pair<double, double>> points;
+
+    for (unsigned int i = 0; i < nb_obj; ++i)
+    {
+        const double ra = random_ra();
+        const double dec = random_dec();
+        points.emplace_back(ra, dec);
+    }
+    return move(points);
+}
 
 int main(int ac, char **av)
 {
@@ -22,11 +50,17 @@ int main(int ac, char **av)
         double radius = std::stod(av[2]);
         double delta = std::stod(av[3]);
 
+        llog::notice["main"] << "Getting points from file..." << std::endl;;
+        auto points = parser.Parse(file);
+
         llog::notice["main"] << "Computing Normal Catalog..." << std::endl;;
         htm->CreateOctahedron();
-        parser.Parse(file);
-        parser.PopulateHTM();
-        htm->CreateHTM();
+        // add points into the HTM
+        for (auto const &p : points)
+        {
+            htm->itemsToStore(p.first, p.second);
+            htm->AddPoint(p.first, p.second);
+        }
 
         llog::debug["main"] << "HTM Created for Normal Catalog" << std::endl;;
         unsigned int nn = htm->TwoPointsCorrelation(radius, delta);
@@ -36,7 +70,7 @@ int main(int ac, char **av)
         double raMax = htm->getMaxRa();
         double decMin = htm->getMinDec();
         double decMax = htm->getMaxDec();
-        llog::notice["main"] << "Computing Mean values for Random and Hybrid Catalog on " << loop << " loops using " << parser.getNbObj() << " random objects..." << std::endl;
+        llog::notice["main"] << "Computing Mean values for Random and Hybrid Catalog on " << loop << " loops using " << points.size() << " random objects..." << std::endl;
 
         unsigned int rr = 0;
         unsigned int nr = 0;
@@ -45,19 +79,36 @@ int main(int ac, char **av)
             llog::debug["main"] << "Computing loop " << i + 1 << " on " << loop << std::endl;
             htm->DeleteOctahedron(); // Oh my God
             htm->CreateOctahedron(); // So that's why...
-            // This is stupid: This function add points into the HTM !!!!
-            parser.UniformNumberGenerator(raMin, raMax, decMin, decMax);
-            htm->CreateHTM(); // This one just pop points from a list filled by the previous call
+            auto random_points = uniform_number_generator(points.size(), raMin, raMax, decMin, decMax);
+            for (auto const &p : random_points)
+            {
+                double ra;
+                double dec;
+
+                std::tie(ra, dec) = p;
+                htm->AddPoint(ra, dec);
+            }
 
             unsigned int currentRR = htm->TwoPointsCorrelation(radius, delta);
             rr += currentRR;
-            llog::debug["main"] << "Two Point Correlation have been computed for the Random Catalog [" << currentRR << "] mean [" << (rr / (i + 1)) << "]" << std::endl;
+            llog::debug["main"]
+                << "Two Point Correlation for the Random Catalog "
+                << "[" << currentRR << "]" << " mean "
+                << "[" << (rr / (i + 1)) << "]" << std::endl;
 
-            parser.PopulateHTM();
+            // Add points into the HTM again
+            for (auto const &p : points)
+            {
+                htm->itemsToStore(p.first, p.second);
+                htm->AddPoint(p.first, p.second);
+            }
             htm->CreateHTM();
             unsigned int currentNR = htm->TwoPointsCorrelation(radius, delta);
             nr += currentNR;
-            llog::debug["main"] << "Two Point Correlation have been computed for the Hybrid Catalog [" << currentNR << "] mean [" << (nr / (i + 1)) << "]" << std::endl;
+            llog::debug["main"]
+                << "Two Point Correlation for the Hybrid Catalog "
+                << "[" << currentNR << "]" << " mean "
+                << "[" << (nr / (i + 1)) << "]" << std::endl;
             std::cout << "\r" << i;
         }
         std::cout << std::endl;
