@@ -88,11 +88,8 @@ std::string HTM::AssignPoint(PointInfo* pt)
             CreateTrixelChild(pt->_current, indexOld);
             if (indexOld != indexCurrent)
                 CreateTrixelChild(pt->_current, indexCurrent);
-            auto it = this->_points.find(pt);
-            if (it != end(this->_points))
-            {
-                this->_points.erase(it);
-            }
+            auto it = this->_points.find(pt->_current->_HTMId);
+            this->_points.erase(it);
         }
         old->_current = pt->_current->_children[indexOld];
         pt->_current = pt->_current->_children[indexCurrent];
@@ -102,7 +99,7 @@ std::string HTM::AssignPoint(PointInfo* pt)
     else if (pt->_current->_nbChildObject == 0)
     {
         pt->_current->_info = pt;
-        this->_points.insert(pt);
+        this->_points[pt->_current->_HTMId] = pt;
         pt->_current->_nbChildObject = 1;
         return pt->_current->_HTMId;
     }
@@ -204,9 +201,9 @@ unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
 
     Constraint *constraint = new Constraint;
 
-    for (auto &pt: this->_points)
+    for (auto &it: this->_points)
     {
-
+        PointInfo *pt = it.second;
         if (IsCorrectRA(pt->_ra) && IsCorrectDEC(pt->_dec))
         {
             double rProjection = sin(90 - abs(pt->_dec));
@@ -439,13 +436,16 @@ void	HTM::DeleteOctahedron(void)
     fstream.close();
 #endif
     for (auto i = 0; i < 8; ++i)
-        this->FreeAllTrixels(this->_octahedron->_rootTrixels[i]);
+    {
+        trixel *current = this->_octahedron->_rootTrixels[i];
+
+        ClearTrixel(current);
+        delete current;
+    }
     for (auto &p : this->_points)
     {
-        delete p;
+        delete p.second;
     }
-    for (auto i = 0; i < 8; ++i)
-        delete this->_octahedron->_rootTrixels[i];
     this->_points.clear();
     delete this->_octahedron;
 }
