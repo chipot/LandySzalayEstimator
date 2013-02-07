@@ -138,6 +138,7 @@ int main(int ac, char **av)
             std::cout << "\r" << i;
         }
         std::cout << std::endl;
+        htm.DeleteOctahedron(); // Oh my God
 
         llog::debug["main"] << "\n...Done !" << std::endl;
 
