@@ -24,14 +24,29 @@
 
 namespace htm {
 
-size_t PointInfoHash::operator()(PointInfo const * pt) const noexcept
+void
+HTM::SelectRootTrixel(PointInfo* pt)
 {
-    return std::hash<std::string>()(pt->_current->_HTMId);
+    for (int i = 0; i < 8; ++i)
+    {
+        Eigen::Vector3d* v = this->_octahedron->_rootTrixels[i]->_vertices;
+        double rProjection = sin(90 - abs(pt->_dec));
+        double x = rProjection * cos(pt->_ra);
+        double y = rProjection * sin(pt->_ra);
+        double z = cos(90 - abs(pt->_dec));
+        Eigen::Vector3d p(x, y, z);
+
+        if (v[0].cross(v[1]).dot(p) > 0 &&
+            v[1].cross(v[2]).dot(p) > 0 &&
+            v[2].cross(v[0]).dot(p) > 0)
+        {
+            pt->_current = this->_octahedron->_rootTrixels[i];
+            return ;
+        }
+    }
+    assert("What the fuck ? This shall never fail");
 }
-bool PointInfoCmp::operator()(PointInfo const *lhs, PointInfo const *rhs) const noexcept
-{
-    return lhs->_current->_HTMId == rhs->_current->_HTMId;
-}
+
 
 // ADD POINT
 void HTM::AddPoint(const double& ra, const double& dec)
@@ -43,14 +58,9 @@ void HTM::AddPoint(const double& ra, const double& dec)
     this->AssignPoint(info);
 }
 
-// CreateHTM
-bool HTM::CreateHTM()
-{
-    return true;
-}
-
 // AssignPoint
-std::string HTM::AssignPoint(PointInfo* pt)
+std::string
+HTM::AssignPoint(PointInfo* pt)
 {
     if (pt->_current->_nbChildObject > 1)
     {
@@ -107,7 +117,10 @@ std::string HTM::AssignPoint(PointInfo* pt)
 }
 
 
-  void HTM::constraintNotInside(trixel* trixel, const Eigen::Vector3d& p, Constraint* constraint)
+void 
+HTM::constraintNotInside(trixel* trixel,
+                         const Eigen::Vector3d& p,
+                         Constraint* constraint)
 {
         Eigen::Vector3d tmpVec1 = trixel->_vertices[1] - trixel->_vertices[0];
         Eigen::Vector3d tmpVec2 = trixel->_vertices[2] - trixel->_vertices[1];
@@ -128,7 +141,9 @@ std::string HTM::AssignPoint(PointInfo* pt)
         }
 }
 
-inline std::pair<double, double>       HTM::CalcCoordPoint(std::pair<double, double>& a, std::pair<double, double>& b)
+inline std::pair<double, double>
+HTM::CalcCoordPoint(std::pair<double, double>& a,
+                    std::pair<double, double>& b)
 {
     std::pair<double, double>	result;
 
@@ -137,37 +152,18 @@ inline std::pair<double, double>       HTM::CalcCoordPoint(std::pair<double, dou
     return result;
 }
 
-void HTM::SelectRootTrixel(PointInfo* pt)
-{
-    for (int i = 0; i < 8; ++i)
-    {
-        Eigen::Vector3d* v = this->_octahedron->_rootTrixels[i]->_vertices;
-        double rProjection = sin(90 - abs(pt->_dec));
-        double x = rProjection * cos(pt->_ra);
-        double y = rProjection * sin(pt->_ra);
-        double z = cos(90 - abs(pt->_dec));
-        Eigen::Vector3d p(x, y, z);
-
-        if (v[0].cross(v[1]).dot(p) > 0 &&
-            v[1].cross(v[2]).dot(p) > 0 &&
-            v[2].cross(v[0]).dot(p) > 0)
-        {
-            pt->_current = this->_octahedron->_rootTrixels[i];
-            return ;
-        }
-    }
-    assert("What the fuck ? This shall never fail");
-}
-
-inline double				HTM::Scal(std::pair<double, double>& v1, std::pair<double, double>& v2) const
+inline double
+HTM::Scal(std::pair<double, double>& v1,
+          std::pair<double, double>& v2) const
 {
     return ((v1.first * v2.first) + (v1.second * v2.second));
 }
 
-bool				HTM::CheckPointInTriangle(std::pair<double, double> A,
-                                                         std::pair<double, double> B,
-                                                         std::pair<double, double> C,
-                                                         std::pair<double, double> P)
+bool
+HTM::CheckPointInTriangle(std::pair<double, double> A,
+                          std::pair<double, double> B,
+                          std::pair<double, double> C,
+                          std::pair<double, double> P)
 {
     std::pair<double, double> 	v0 = CalcCoordPoint(C, A);
     std::pair<double, double> 	v1 = CalcCoordPoint(B, A);
@@ -188,7 +184,9 @@ bool				HTM::CheckPointInTriangle(std::pair<double, double> A,
 }
 
 /// TwoPointsCorrelation
-unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
+unsigned int
+HTM::TwoPointsCorrelation(double& radius,
+                          double& delta)
 {
     unsigned int nbPairs = 0;
 
@@ -304,7 +302,9 @@ unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
 }
 
 /// SelectOctahedronTrixel
-trixel* HTM::SelectRootOctahedronTrixel(const double& ra, const double& dec)
+trixel*
+HTM::SelectRootOctahedronTrixel(const double& ra,
+                                const double& dec)
 {
     unsigned int trixelNumber = 0;
 
@@ -348,7 +348,8 @@ trixel* HTM::SelectRootOctahedronTrixel(const double& ra, const double& dec)
     return this->_octahedron->_rootTrixels[trixelNumber];
 }
 
-void	HTM::CreateOctahedron(void)
+void
+HTM::CreateOctahedron()
 {
     this->_octahedron = new Octahedron;
     this->_octahedron->_rootTrixels = new trixel*[8];
@@ -393,7 +394,8 @@ void	HTM::CreateOctahedron(void)
     this->_octahedron->_rootTrixels[7]->_vertices[2] = v1;
 }
 
-void	HTM::Display(std::ofstream& fstream)
+void
+HTM::Display(std::ofstream& fstream)
 {
 #ifndef NDEBUG
     for (auto const &point : this->_points)
@@ -408,7 +410,8 @@ void	HTM::Display(std::ofstream& fstream)
 #endif
 }
 
-void	HTM::FreeAllTrixels(trixel* current)
+void
+HTM::FreeAllTrixels(trixel* current)
 {
     if (current != NULL)
     {
@@ -427,7 +430,8 @@ void	HTM::FreeAllTrixels(trixel* current)
     }
 }
 
-void	HTM::DeleteOctahedron(void)
+void
+HTM::DeleteOctahedron()
 {
 #ifndef NDEBUG
     std::ofstream fstream;

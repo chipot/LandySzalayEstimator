@@ -30,10 +30,10 @@ class HTM
   std::string AssignPoint(PointInfo *pt);
 
   /// Create the base octahedron
-  void CreateOctahedron(void);
+  void CreateOctahedron();
 
   /// Delete the base Octahedron
-  void DeleteOctahedron(void);
+  void DeleteOctahedron();
 
   /// Get number of pairs a the radius -+ delta from the given object
   unsigned int TwoPointsCorrelation(double &radius, double &delta);
@@ -46,23 +46,31 @@ class HTM
   ///
   void SelectRootTrixel(PointInfo* pt);
 
-  /// 
-  inline std::pair<double, double> CalcCoordPoint(std::pair<double, double>& a, std::pair<double, double>& b);
+  ///
+  inline std::pair<double, double>
+      CalcCoordPoint(std::pair<double, double>& a,
+                     std::pair<double, double>& b);
 
-  /// 
-  inline double Scal(std::pair<double, double>& v1, std::pair<double, double>& v2) const;
+  ///
+  inline double
+      Scal(std::pair<double, double>& v1,
+           std::pair<double, double>& v2) const;
 
-  /// 
-  bool CheckPointInTriangle(std::pair<double, double> A, std::pair<double, double> B, std::pair<double, double> C, std::pair<double, double> P);
+  ///
+  bool
+      CheckPointInTriangle(std::pair<double, double> A,
+                           std::pair<double, double> B,
+                           std::pair<double, double> C,
+                           std::pair<double, double> P);
 
   /// Check if a point is in a triangle describe by the given boundaries
-  bool PointInTriangle(const double& ra, const double& dec, double* boundaries);
-
-  /// Create a new base trixel (on of the octahedron face)
-  //trixel* CreateRootTrixel(std::string HTMId);
+  bool PointInTriangle(const double& ra,
+                       const double& dec,
+                       double* boundaries);
 
   /// Select the first level trixel in the given octahedron
-  trixel* SelectRootOctahedronTrixel(const double& ra, const double& dec);
+  trixel* SelectRootOctahedronTrixel(const double& ra,
+                                     const double& dec);
 
   /// send all trixels from the given one into the given output stream
   void Display(std::ofstream& fstream);
@@ -75,10 +83,15 @@ class HTM
   double* ComputeRootTrixelBounds(trixel* trixel);
 
   /// Compute new bounds of a trixel's child from it's parent bounds and index
-  double* ComputeTrixelBounds(const double* fatherBounds, unsigned int& index, bool& reverse);
+  double* ComputeTrixelBounds(const double* fatherBounds,
+                              unsigned int& index,
+                              bool& reverse);
 
   /// get the index an point using the parent trixel bounds
-  unsigned int getIndex(double* boundaries, bool& reverse, const double& ra, const double& dec);
+  unsigned int getIndex(double* boundaries,
+                        bool& reverse,
+                        const double& ra,
+                        const double& dec);
 
  public:
   HTM();
