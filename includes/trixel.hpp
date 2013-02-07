@@ -50,10 +50,10 @@ unsigned short int GetIndex(trixel* trixel, PointInfo* object);
 void InitTrixel(trixel* trixel);
 
 /// Check if the given right ascension value is correct
-bool IsCorrectRA(double& ra);
+bool IsCorrectRA(double const& ra);
 
 /// Check if the given declination value is correct
-bool IsCorrectDEC(double& dec);
+bool IsCorrectDEC(double const& dec);
 
 } // htm
 

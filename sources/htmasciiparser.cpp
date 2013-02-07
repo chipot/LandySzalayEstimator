@@ -35,13 +35,4 @@ HTMAsciiParser::Parse(std::string& filename)
     return std::move(points);
 }
 
-HTMAsciiParser::HTMAsciiParser(HTM *htm)
-    : _htm{htm}
-{
-}
-
-HTMAsciiParser::~HTMAsciiParser()
-{
-}
-
 }

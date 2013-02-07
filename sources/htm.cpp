@@ -33,8 +33,6 @@ bool PointInfoCmp::operator()(PointInfo const *lhs, PointInfo const *rhs) const 
     return lhs->_current->_HTMId == rhs->_current->_HTMId;
 }
 
-HTM* HTM::_singleton = NULL; // Initialize the singleton to NULL.
-
 // ADD POINT
 void HTM::AddPoint(const double& ra, const double& dec)
 {
@@ -192,27 +190,6 @@ bool				HTM::CheckPointInTriangle(std::pair<double, double> A,
     return ((u >= 0) && (v >= 0) && (u + v < 1));
 }
 
-/// Create the instance of the HTM core if applicable and/or return a pointer to it.
-HTM* HTM::GetInstance()
-{
-    if (HTM::_singleton == NULL)
-    {
-        HTM::_singleton = new HTM();
-    }
-    return HTM::_singleton;
-}
-
-/// DELETE
-/// Delete the instance of the HTM core
-void HTM::Delete()
-{
-    if (HTM::_singleton != NULL)
-    {
-        delete HTM::_singleton;
-        HTM::_singleton = NULL;
-    }
-}
-
 /// TwoPointsCorrelation
 unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
 {
@@ -282,7 +259,7 @@ unsigned int HTM::TwoPointsCorrelation(double& radius, double& delta)
 
                 if (supInside == 3 && infInside == 0)
                     constraint->_inside.push_back(tmp);
-                else if ((supInside == 3 && infInside > 0) 
+                else if ((supInside == 3 && infInside > 0)
                          || supInside > 0)
                 {
                     if (tmp->_children != NULL)
@@ -419,53 +396,17 @@ void	HTM::CreateOctahedron(void)
     this->_octahedron->_rootTrixels[7]->_vertices[2] = v1;
 }
 
-void	HTM::Display(trixel* current, std::ofstream& fstream)
+void	HTM::Display(std::ofstream& fstream)
 {
-#if 0
-    if (current != NULL)
+#ifndef NDEBUG
+    for (auto const &point : this->_points)
     {
-        if (current->_children != NULL)
-        {
-            for (auto i = 0; i < 4; ++i)
-            {
-                if (current->_children[i] != NULL)
-                {
-                    Display(current->_children[i], fstream);
-                    if (current->_children[0])
-                    {
-                        if (this->_points[current->_children[0]->_HTMId])
-                        {
-                            PointInfo* info = this->_points[current->_children[0]->_HTMId];
-                            fstream << "Item stored at trixel : " << current->_children[0]->_HTMId << " with right ascension and declinaison at " << info->_ra << " " << info->_dec << std::endl;
-                        }
-                    }
-                    else if (current->_children[1])
-                    {
-                        if (this->_points[current->_children[1]->_HTMId])
-                        {
-                            PointInfo* info = this->_points[current->_children[1]->_HTMId];
-                            fstream << "Item stored at trixel : " << current->_children[1]->_HTMId << " with right ascension and declinaison at " << info->_ra << " " << info->_dec << std::endl;
-                        }
-                    }
-                    else if (current->_children[2])
-                    {
-                        if (this->_points[current->_children[2]->_HTMId])
-                        {
-                            PointInfo* info = this->_points[current->_children[2]->_HTMId];
-                            fstream << "Item stored at trixel : " << current->_children[2]->_HTMId << " with right ascension and declinaison at " << info->_ra << " " << info->_dec << std::endl;
-                        }
-                    }
-                    else if (current->_children[3])
-                    {
-                        if (this->_points[current->_children[3]->_HTMId])
-                        {
-                            PointInfo* info = this->_points[current->_children[3]->_HTMId];
-                            fstream << "Item stored at trixel : " << current->_children[3]->_HTMId << " with right ascension and declinaison at " << info->_ra << " " << info->_dec << std::endl;
-                        }
-                    }
-                }
-            }
-        }
+        trixel *current = point->_current;
+
+        if (current)
+            fstream << "Item stored at trixel : "
+                << current->_HTMId << " with right ascension and declinaison at "
+                << point->_ra << " " << point->_dec << std::endl;
     }
 #endif
 }
@@ -491,11 +432,12 @@ void	HTM::FreeAllTrixels(trixel* current)
 
 void	HTM::DeleteOctahedron(void)
 {
-    //std::ofstream fstream;
-    //fstream.open("log");
-    //for (auto i = 0; i < 8; ++i)
-    //    this->Display(this->_octahedron->_rootTrixels[i], fstream);
-    //fstream.close();
+#ifndef NDEBUG
+    std::ofstream fstream;
+    fstream.open("log");
+    this->Display(fstream);
+    fstream.close();
+#endif
     for (auto i = 0; i < 8; ++i)
         this->FreeAllTrixels(this->_octahedron->_rootTrixels[i]);
     for (auto &p : this->_points)

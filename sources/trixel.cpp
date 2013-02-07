@@ -282,7 +282,7 @@ void InitTrixel(trixel* trixel)
 
 // --------------------------------------------------------------------
 // ISCORRECTRA
-bool IsCorrectRA(double& ra)
+bool IsCorrectRA(double const& ra)
 {
     if (ra >= 0 && ra < 360)
         return true;
@@ -291,7 +291,7 @@ bool IsCorrectRA(double& ra)
 
 // --------------------------------------------------------------------
 // ISCORRECTDEC
-bool IsCorrectDEC(double& dec)
+bool IsCorrectDEC(double const& dec)
 {
     if (dec > -90 && dec <= 90)
         return true;

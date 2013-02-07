@@ -72,8 +72,8 @@ int main(int ac, char **av)
     if (ac == 4)
     {
         std::string file(av[1]);
-        htm::HTM *htm = htm::HTM::GetInstance();
-        htm::HTMAsciiParser parser(htm);
+        htm::HTM htm;
+        htm::HTMAsciiParser parser;
 
         double radius = std::stod(av[2]);
         double delta = std::stod(av[3]);
@@ -82,15 +82,15 @@ int main(int ac, char **av)
         auto points = parser.Parse(file);
 
         llog::notice["main"] << "Computing Normal Catalog..." << std::endl;;
-        htm->CreateOctahedron();
+        htm.CreateOctahedron();
         // add points into the HTM
         for (auto const &p : points)
         {
-            htm->AddPoint(p.first, p.second);
+            htm.AddPoint(p.first, p.second);
         }
 
         llog::debug["main"] << "HTM Created for Normal Catalog" << std::endl;;
-        unsigned int nn = htm->TwoPointsCorrelation(radius, delta);
+        unsigned int nn = htm.TwoPointsCorrelation(radius, delta);
         llog::notice["main"] << "Two Point Correlation have been computed for the Normal Catalog [" << nn << "] pairs" << std::endl; 
 
         llog::notice["main"]
@@ -109,15 +109,15 @@ int main(int ac, char **av)
         for (unsigned int i = 0; i != loop; ++i)
         {
             llog::debug["main"] << "Computing loop " << i + 1 << " on " << loop << std::endl;
-            htm->DeleteOctahedron(); // Oh my God
-            htm->CreateOctahedron(); // So that's why...
+            htm.DeleteOctahedron(); // Oh my God
+            htm.CreateOctahedron(); // So that's why...
 
             // Add random points into the HTM
             auto random_points = uniform_number_generator(points.size(), raMin, raMax, decMin, decMax);
             for (auto const &p : random_points)
-                htm->AddPoint(p.first, p.second);
+                htm.AddPoint(p.first, p.second);
 
-            unsigned int currentRR = htm->TwoPointsCorrelation(radius, delta);
+            unsigned int currentRR = htm.TwoPointsCorrelation(radius, delta);
             rr += currentRR;
             llog::debug["main"]
                 << "Two Point Correlation for the Random Catalog "
@@ -126,9 +126,9 @@ int main(int ac, char **av)
 
             // Add points from the file into the HTM
             for (auto const &p : points)
-                htm->AddPoint(p.first, p.second);
+                htm.AddPoint(p.first, p.second);
 
-            unsigned int currentNR = htm->TwoPointsCorrelation(radius, delta);
+            unsigned int currentNR = htm.TwoPointsCorrelation(radius, delta);
             nr += currentNR;
             llog::debug["main"]
                 << "Two Point Correlation for the Hybrid Catalog "
@@ -157,7 +157,6 @@ int main(int ac, char **av)
 
         llog::notice["main"] << "Landy Szalay Estimator for current catalog returns : "<< std::scientific << std::setprecision(15) << estimator << std::endl;
 
-        htm->Delete();
     }
     else
         llog::fatal["main"] << "Usage : ./LandySzalayEstimator <catalog_file> <radius> <delta>" << std::endl;
