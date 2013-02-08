@@ -11,12 +11,11 @@ struct PointInfo;
 /// Structure that define a trixel (htm base object)
 struct trixel
 {
+    unsigned int            _nbChildObject; //< Number of objects contained in this trixel.
     struct trixel         **_children;  //< trixel's subtrixels
     Eigen::Vector3d        *_vertices;  //< Trixel's vertices
-    bool                    _reverse;   //< is an upside-down trixel ?
-    std::string             _HTMId;     //< N10120112121101
-    unsigned int            _nbChildObject; //< Number of objects contained in this trixel.
     struct PointInfo       *_info;      //< Point information structure for the actual 
+    std::string             _HTMId;     //< N10120112121101
 };
 
 /// Delte the given trixel (but not the PointInfo)

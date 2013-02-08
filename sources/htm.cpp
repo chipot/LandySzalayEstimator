@@ -117,7 +117,7 @@ HTM::AssignPoint(PointInfo* pt)
 }
 
 
-void 
+void
 HTM::constraintNotInside(trixel* trixel,
                          const Eigen::Vector3d& p,
                          Constraint* constraint)
@@ -133,8 +133,8 @@ HTM::constraintNotInside(trixel* trixel,
         if (theta < phi1 + phi2)
         {
 	    if (!(trixel->_vertices[0].cross(trixel->_vertices[1]).dot(p) < 0 &&
-                  trixel->_vertices[1].cross(trixel->_vertices[2]).dot(p) < 0 &&
-                  trixel->_vertices[2].cross(trixel->_vertices[0]).dot(p)))
+              trixel->_vertices[1].cross(trixel->_vertices[2]).dot(p) < 0 &&
+              trixel->_vertices[2].cross(trixel->_vertices[0]).dot(p)))
             {
                 constraint->_partial.push_back(trixel);
             }
@@ -183,6 +183,45 @@ HTM::CheckPointInTriangle(std::pair<double, double> A,
     return ((u >= 0) && (v >= 0) && (u + v < 1));
 }
 
+std::tuple<unsigned int, unsigned int, unsigned int>
+locate_edges(trixel const &t,
+             Eigen::Vector3d const &p,
+             double high_limit,
+             double low_limit)
+{
+    unsigned short int further_high_border = 0;
+    unsigned short int bellow_low_border = 0;
+    unsigned short int inside_donut = 0;
+
+    auto dot_v0 = p.dot(t._vertices[0]);
+    auto dot_v1 = p.dot(t._vertices[1]);
+    auto dot_v2 = p.dot(t._vertices[2]);
+
+    // check if totally outside
+    if (dot_v0 > high_limit)
+        further_high_border++;
+    else if (dot_v0 < low_limit)
+        bellow_low_border++;
+    else
+        inside_donut++;
+
+    if (dot_v1 > high_limit)
+        further_high_border++;
+    else if (dot_v1 < low_limit)
+        bellow_low_border++;
+    else
+        inside_donut++;
+
+    if (dot_v2 > high_limit)
+        further_high_border++;
+    else if (dot_v2 < low_limit)
+        bellow_low_border++;
+    else
+        inside_donut++;
+
+    return std::make_tuple(bellow_low_border, inside_donut, further_high_border);
+}
+
 /// TwoPointsCorrelation
 unsigned int
 HTM::TwoPointsCorrelation(double& radius,
@@ -209,67 +248,49 @@ HTM::TwoPointsCorrelation(double& radius,
             double y = rProjection * sin(pt->_ra);
             double z = cos(90 - abs(pt->_dec));
             Eigen::Vector3d p(x, y, z);
-            std::queue<std::tuple<unsigned short int, unsigned short int, trixel*>> workingList;
+            std::queue<trixel*> workingList;
 
-            for (unsigned int i = 0; i < 4; ++i)
+            for (unsigned int i = 0; i < 8; ++i)
             {
-                unsigned short int infInside = 0;
-                unsigned short int supInside = 0;
                 trixel *current_trixel = this->_octahedron->_rootTrixels[i];
-
-                if (current_trixel != NULL)
-                {
-
-                    if (p.dot(current_trixel->_vertices[0]) > infLimit)
-                        ++infInside;
-                    if (p.dot(current_trixel->_vertices[1]) > infLimit)
-                        ++infInside;
-                    if (p.dot(current_trixel->_vertices[2]) > infLimit)
-                        ++infInside;
-
-                    if (p.dot(current_trixel->_vertices[0]) > supLimit)
-                        ++supInside;
-                    if (p.dot(current_trixel->_vertices[1]) > supLimit)
-                        ++supInside;
-                    if (p.dot(current_trixel->_vertices[2]) > supLimit)
-                        ++supInside;
-                }
-                if (supInside == 3 && infInside == 0)
-                    constraint->_inside.push_back(current_trixel);
-                if ((supInside == 3 && infInside > 0) || supInside > 0)
-                    workingList.push(std::make_tuple(supInside, infInside, current_trixel));
-                else
-                {
-		  constraintNotInside(current_trixel, p, constraint);
-                }
+                workingList.push(current_trixel);
             }
             while (workingList.size() > 0)
             {
-                unsigned short int infInside = 0;
-                unsigned short int supInside = 0;
-                trixel* tmp;
-
-                std::tie(supInside, infInside, tmp) = workingList.front();
+                unsigned short int further= 0;
+                unsigned short int bellow = 0;
+                unsigned short int inside = 0;
+                trixel *current_trixel = workingList.front();
                 workingList.pop();
 
-                if (supInside == 3 && infInside == 0)
-                    constraint->_inside.push_back(tmp);
-                else if ((supInside == 3 && infInside > 0)
-                         || supInside > 0)
+                if (current_trixel == NULL)
+                    continue;
+
+                auto const & tup = locate_edges(*current_trixel, p, supLimit, infLimit);
+                std::tie(bellow, inside, further) = tup;
+
+                if (inside == 3)
                 {
-                    if (tmp->_children != NULL)
+                    //llog::notice["inside"] << current_trixel->_HTMId << std::endl;
+                    constraint->_inside.push_back(current_trixel);
+                }
+                else if ((bellow > 0 && (inside > 0 || further > 0)) ||
+                         (further > 0 && (inside > 0 || bellow > 0)))
+                {
+                    //llog::notice["partial"] << current_trixel->_HTMId << std::endl;
+                    if (current_trixel->_children != NULL)
                     {
                         for (unsigned int i = 0; i < 4; ++i)
-                            if (tmp->_children[i] != NULL)
-                                workingList.push(std::make_tuple(supInside, infInside, tmp->_children[i]));
+                            if (current_trixel->_children[i] != NULL)
+                                workingList.push(current_trixel->_children[i]);
                     }
                     else
-                        constraint->_partial.push_back(tmp);
+                        constraint->_partial.push_back(current_trixel);
                 }
                 else
                 {
-                    Eigen::Vector3d tmpVec1 = tmp->_vertices[1] - tmp->_vertices[0];
-                    Eigen::Vector3d tmpVec2 = tmp->_vertices[2] - tmp->_vertices[1];
+                    Eigen::Vector3d tmpVec1 = current_trixel->_vertices[1] - current_trixel->_vertices[0];
+                    Eigen::Vector3d tmpVec2 = current_trixel->_vertices[2] - current_trixel->_vertices[1];
                     Eigen::Vector3d tmpVec3 = tmpVec1.cross(tmpVec2);
                     Eigen::Vector3d trixelBoundary = tmpVec3 / tmpVec3.norm();
 
@@ -278,11 +299,11 @@ HTM::TwoPointsCorrelation(double& radius,
                     double phi2 = acos(p.dot(Eigen::Vector3d(1,0,0)) / p.norm());
                     if (theta < phi1 + phi2)
                     {
-                        if (!(tmp->_vertices[0].cross(tmp->_vertices[1]).dot(p) < 0 &&
-                              tmp->_vertices[1].cross(tmp->_vertices[2]).dot(p) < 0 &&
-                              tmp->_vertices[2].cross(tmp->_vertices[0]).dot(p)))
+                        if (!(current_trixel->_vertices[0].cross(current_trixel->_vertices[1]).dot(p) < 0 &&
+                              current_trixel->_vertices[1].cross(current_trixel->_vertices[2]).dot(p) < 0 &&
+                              current_trixel->_vertices[2].cross(current_trixel->_vertices[0]).dot(p)))
                         {
-                            constraint->_partial.push_back(tmp);
+                            constraint->_partial.push_back(current_trixel);
                         }
                     }
                 }

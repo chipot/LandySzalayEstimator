@@ -273,7 +273,6 @@ void InitTrixel(trixel* trixel)
         trixel->_children = NULL;
         trixel->_vertices = NULL;
         trixel->_vertices = new Eigen::Vector3d[3];
-        trixel->_reverse = false;
         trixel->_HTMId = "";
         trixel->_nbChildObject = 0;
         trixel->_info = NULL;      
