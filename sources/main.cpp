@@ -40,8 +40,9 @@ uniform_number_generator(unsigned int nb_obj,
     return move(points);
 }
 
+template <template <typename ... T> class C>
 std::tuple<double, double, double, double>
-find_minmax(std::vector<std::pair<double, double>> &points)
+find_minmax(C<std::pair<double, double>> &points)
 {
     double min_ra = DBL_MAX;
     double max_ra = DBL_MIN;
